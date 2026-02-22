@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Report 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:    #080608;
+  --bg1:   #100a0a;
+  --bg2:   #180d0d;
+  --bg3:   #221212;
+  --accent:  #dc2626;
+  --accent2: #10b981;
+  --accent3: #f59e0b;
+  --accent4: #ef4444;
+  --accent5: #b91c1c;
+  --text:  #e8dada;
+  --text2: #9a7f7f;
+  --text3: #5a3f3f;
+  --border: #2a1515;
+  --red-glow: rgba(220,38,38,0.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Grid background */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(220,38,38,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220,38,38,0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 20px 80px; }
+
+/* HEADER */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 0 16px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { font-size: 22px; }
+.logo-text { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+.logo-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1px; margin-top: 2px; }
+.header-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); text-align: right; }
+.header-meta span { display: block; }
+
+/* VIEW TOGGLE */
+.view-toggle {
+  display: flex; gap: 4px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  padding: 4px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  width: fit-content;
+}
+.vbtn {
+  background: none; border: none; cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+  padding: 7px 18px; border-radius: 4px; transition: all 0.2s;
+}
+.vbtn.active { background: var(--accent); color: #fff; }
+.vbtn:hover:not(.active) { color: var(--text); background: var(--bg3); }
+
+/* MONTH TABS */
+.month-tabs {
+  display: flex; gap: 3px; flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.mtab {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500;
+  color: var(--text3); letter-spacing: 0.5px;
+  padding: 5px 10px; border-radius: 3px; transition: all 0.2s;
+  position: relative;
+}
+.mtab.active { border-color: var(--accent); color: var(--accent); background: rgba(220,38,38,0.08); }
+.mtab:hover:not(.active):not(.soon) { border-color: var(--text3); color: var(--text2); }
+.mtab.soon { opacity: 0.35; cursor: not-allowed; }
+.mtab .soon-date { display: block; font-size: 8px; color: var(--text3); margin-top: 2px; }
+
+/* STAT CARDS */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg1); border: 1px solid var(--border);
+  border-radius: 6px; padding: 18px;
+  position: relative; overflow: hidden;
+  animation: fadeUp 0.4s ease both;
+}
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--accent);
+}
+.stat-card.green::before { background: var(--accent2); }
+.stat-card.amber::before { background: var(--accent3); }
+.stat-card.neg::before { background: var(--accent4); }
+.stat-watermark {
+  position: absolute; right: 12px; bottom: 8px;
+  font-size: 28px; opacity: 0.12; pointer-events: none;
+}
+.stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: var(--text); }
+.stat-val.pos { color: var(--accent2); }
+.stat-val.neg-color { color: var(--accent4); }
+.stat-val.red { color: var(--accent); }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* CHARTS */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; padding: 20px;
+}
+.chart-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+.chart-inner { display: flex; align-items: center; gap: 20px; }
+.chart-canvas-wrap { width: 140px; height: 140px; flex-shrink: 0; }
+.chart-legend { flex: 1; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { color: var(--text2); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legend-pct { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); }
+
+/* BREAKDOWN TABLE */
+.section-title {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 12px; margin-top: 28px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.bk-list { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+.bk-row {
+  display: grid; grid-template-columns: 1fr auto auto auto;
+  align-items: center; gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.15s;
+  user-select: none;
+}
+.bk-row:last-of-type { border-bottom: none; }
+.bk-row:hover { background: var(--bg2); }
+.bk-row.open { background: rgba(220,38,38,0.06); border-left: 2px solid var(--accent); }
+.bk-cat { font-size: 13px; font-weight: 500; }
+.bk-count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); }
+.bk-bar-wrap { width: 80px; background: var(--bg3); border-radius: 2px; height: 4px; }
+.bk-bar { height: 4px; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
+.bk-amt { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; min-width: 90px; text-align: right; }
+.bk-chevron { font-size: 10px; color: var(--text3); transition: transform 0.2s; margin-left: 4px; }
+.bk-row.open .bk-chevron { transform: rotate(180deg); color: var(--accent); }
+
+.bk-txns {
+  display: none; border-bottom: 1px solid var(--border);
+  animation: slideDown 0.2s ease;
+}
+.bk-txns.open { display: block; }
+@keyframes slideDown { from { opacity: 0; } to { opacity: 1; } }
+
+.bk-txns table { width: 100%; border-collapse: collapse; }
+.bk-txns th {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 8px 16px; text-align: left; background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.bk-txns td { padding: 8px 16px; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(42,21,21,0.5); }
+.bk-txns tr:last-child td { border-bottom: none; }
+.bk-txns tr:hover td { background: var(--bg2); color: var(--text); }
+.bk-txns .subtotal td { background: var(--bg2); color: var(--text3); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; border-top: 1px solid var(--border); }
+.bk-txns .subtotal .amt-cell { color: var(--accent); }
+.txn-amt { font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: right; }
+
+/* FULL TRANSACTION TABLES */
+.txn-table-wrap { background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+.txn-table-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--bg2);
+}
+.txn-table-head h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.txn-table-head .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); }
+table.full { width: 100%; border-collapse: collapse; }
+table.full th { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+table.full th:hover { color: var(--text2); }
+table.full td { padding: 8px 14px; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(42,21,21,0.4); }
+table.full tr:last-child td { border-bottom: none; }
+table.full tr:hover td { background: var(--bg2); color: var(--text); }
+.tag {
+  display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  padding: 2px 7px; border-radius: 3px; border: 1px solid; white-space: nowrap;
+}
+
+/* YEARLY VIEW */
+.year-tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+}
+.ytab {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;
+  color: var(--text3); letter-spacing: 2px;
+  padding: 10px 28px; border-radius: 4px; transition: all 0.2s;
+}
+.ytab.active { border-color: var(--accent); color: var(--accent); background: rgba(220,38,38,0.08); }
+.ytab:hover:not(.active):not(.soon) { border-color: var(--text3); color: var(--text2); }
+.ytab.soon { opacity: 0.35; cursor: not-allowed; }
+
+.year-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+
+.month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.mgrid-card {
+  background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; padding: 16px;
+  transition: all 0.2s;
+}
+.mgrid-card.clickable { cursor: pointer; }
+.mgrid-card.clickable:hover { border-color: var(--accent); background: rgba(220,38,38,0.04); }
+.mgrid-card.soon { opacity: 0.4; }
+.mgrid-month { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.mgrid-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; }
+.mgrid-row .lbl { color: var(--text3); }
+.mgrid-row .val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.mgrid-row .val.inc { color: var(--accent2); }
+.mgrid-row .val.exp { color: var(--accent4); }
+.mgrid-row .val.net.pos { color: var(--accent2); }
+.mgrid-row .val.net.neg { color: var(--accent4); }
+.mgrid-soon { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 6px; }
+.mgrid-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 8px; padding: 1px 5px; border-radius: 2px; background: rgba(220,38,38,0.15); color: var(--accent); border: 1px solid rgba(220,38,38,0.3); margin-top: 4px; }
+
+/* TICKER */
+.ticker-wrap {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg2); border-top: 1px solid var(--border);
+  height: 32px; overflow: hidden; z-index: 100;
+}
+.ticker {
+  display: flex; align-items: center; height: 100%;
+  white-space: nowrap;
+  animation: tickerScroll 60s linear infinite;
+}
+.ticker-item { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); padding: 0 40px; }
+.ticker-item span { color: var(--accent); }
+@keyframes tickerScroll {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(-100%); }
+}
+
+/* HIDDEN */
+.hidden { display: none !important; }
+
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .stat-row, .year-stat-row { grid-template-columns: 1fr 1fr; }
+  .chart-row { grid-template-columns: 1fr; }
+  .month-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <span class="logo-icon">🐱</span>
+      <div>
+        <div class="logo-text">Finance Report</div>
+        <div class="logo-sub">NT$ · PERSONAL TRACKER · 2025–2026</div>
+      </div>
+    </div>
+    <div class="header-meta">
+      <span id="live-time">—</span>
+      <span style="margin-top:3px">SYSTEM NOMINAL</span>
+    </div>
+  </header>
+
+  <div class="view-toggle">
+    <button class="vbtn active" onclick="setView('monthly',this)">Monthly View</button>
+    <button class="vbtn" onclick="setView('yearly',this)">Yearly Overview</button>
+  </div>
+
+  <!-- ═══════════════════ MONTHLY VIEW ═══════════════════ -->
+  <div id="view-monthly">
+    <div class="month-tabs" id="month-tabs"></div>
+    <div id="monthly-content"></div>
+  </div>
+
+  <!-- ═══════════════════ YEARLY VIEW ═══════════════════ -->
+  <div id="view-yearly" class="hidden">
+    <div class="year-tabs" id="year-tabs"></div>
+    <div id="yearly-content"></div>
+  </div>
+
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">🐱 <span>"I can has budget?"</span> — anonymous cat</span>
+    <span class="ticker-item">📊 Spending tracked. Cat approved.</span>
+    <span class="ticker-item">😾 Your wallet when you check expenses</span>
+    <span class="ticker-item">🐈 <span>"Did I buy that? ...yes."</span></span>
+    <span class="ticker-item">💸 Money go brr. Cat go nom.</span>
+    <span class="ticker-item">📉 Graph goes down. Cat judges silently.</span>
+    <span class="ticker-item">😼 <span>Savings rate: meow%</span></span>
+    <span class="ticker-item">🔴 Red is not just the theme — it's the vibe.</span>
+    <span class="ticker-item">📈 NT$ tracked. Cat satisfied.</span>
+    <span class="ticker-item">😺 <span>Budget balanced. Treat yourself. Maybe.</span></span>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const EXPENSES = [
+  // DECEMBER 2025
+  {date:'Dec 1, 2025',desc:'Breakfast',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:80,month:'2025-12'},
+  {date:'Dec 1, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2025-12'},
+  {date:'Dec 2, 2025',desc:'Lunch bento',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:95,month:'2025-12'},
+  {date:'Dec 2, 2025',desc:'Convenience store',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:65,month:'2025-12'},
+  {date:'Dec 3, 2025',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:22,month:'2025-12'},
+  {date:'Dec 3, 2025',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:120,month:'2025-12'},
+  {date:'Dec 4, 2025',desc:'Notebook',cat:'School',acct:'Cash',who:'Self',amt:150,month:'2025-12'},
+  {date:'Dec 4, 2025',desc:'Dinner out',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:280,month:'2025-12'},
+  {date:'Dec 5, 2025',desc:'MRT x2',cat:'Transport',acct:'EasyCard',who:'Self',amt:56,month:'2025-12'},
+  {date:'Dec 5, 2025',desc:'Shampoo',cat:'Personal',acct:'Cash',who:'Self',amt:199,month:'2025-12'},
+  {date:'Dec 6, 2025',desc:'Weekend brunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:320,month:'2025-12'},
+  {date:'Dec 6, 2025',desc:'Snacks',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:75,month:'2025-12'},
+  {date:'Dec 7, 2025',desc:'Stationery',cat:'School',acct:'Cash',who:'Self',amt:88,month:'2025-12'},
+  {date:'Dec 8, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:110,month:'2025-12'},
+  {date:'Dec 8, 2025',desc:'Bus fare',cat:'Transport',acct:'EasyCard',who:'Self',amt:25,month:'2025-12'},
+  {date:'Dec 9, 2025',desc:'Book',cat:'School',acct:'Cash',who:'Self',amt:380,month:'2025-12'},
+  {date:'Dec 9, 2025',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:195,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'Toothpaste',cat:'Personal',acct:'Cash',who:'Self',amt:69,month:'2025-12'},
+  {date:'Dec 11, 2025',desc:'Coffee shop',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:145,month:'2025-12'},
+  {date:'Dec 11, 2025',desc:'Phone bill',cat:'Personal',acct:'Bank',who:'Self',amt:599,month:'2025-12'},
+  {date:'Dec 12, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:90,month:'2025-12'},
+  {date:'Dec 12, 2025',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Self',amt:180,month:'2025-12'},
+  {date:'Dec 13, 2025',desc:'Weekend market',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:250,month:'2025-12'},
+  {date:'Dec 14, 2025',desc:'Pens',cat:'School',acct:'Cash',who:'Self',amt:75,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'Dinner with friends',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:450,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2025-12'},
+  {date:'Dec 16, 2025',desc:'Face wash',cat:'Personal',acct:'Cash',who:'Self',amt:189,month:'2025-12'},
+  {date:'Dec 17, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:105,month:'2025-12'},
+  {date:'Dec 17, 2025',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:22,month:'2025-12'},
+  {date:'Dec 18, 2025',desc:'Printing',cat:'School',acct:'Cash',who:'Self',amt:65,month:'2025-12'},
+  {date:'Dec 18, 2025',desc:'Drinks',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:85,month:'2025-12'},
+  {date:'Dec 19, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:56,month:'2025-12'},
+  {date:'Dec 19, 2025',desc:'Vitamins',cat:'Personal',acct:'Cash',who:'Self',amt:299,month:'2025-12'},
+  {date:'Dec 20, 2025',desc:'Weekend lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:220,month:'2025-12'},
+  {date:'Dec 21, 2025',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:175,month:'2025-12'},
+  {date:'Dec 21, 2025',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Self',amt:200,month:'2025-12'},
+  {date:'Dec 22, 2025',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:130,month:'2025-12'},
+  {date:'Dec 22, 2025',desc:'Notebook refill',cat:'School',acct:'Cash',who:'Self',amt:60,month:'2025-12'},
+  {date:'Dec 23, 2025',desc:'Grocery run',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:310,month:'2025-12'},
+  {date:'Dec 23, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2025-12'},
+  {date:'Dec 24, 2025',desc:'Christmas dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:680,month:'2025-12'},
+  {date:'Dec 24, 2025',desc:'Gifts',cat:'Personal',acct:'Cash',who:'Self',amt:800,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'Holiday snacks',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:245,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'Movie ticket',cat:'Entertainment',acct:'Cash',who:'Self',amt:300,month:'2025-12'},
+  {date:'Dec 26, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:120,month:'2025-12'},
+  {date:'Dec 26, 2025',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:22,month:'2025-12'},
+  {date:'Dec 27, 2025',desc:'Snacks',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:90,month:'2025-12'},
+  {date:'Dec 27, 2025',desc:'Conditioner',cat:'Personal',acct:'Cash',who:'Self',amt:149,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Weekend brunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:280,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Karaoke',cat:'Entertainment',acct:'Cash',who:'Self',amt:350,month:'2025-12'},
+  {date:'Dec 29, 2025',desc:'Lunch box',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:95,month:'2025-12'},
+  {date:'Dec 29, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2025-12'},
+  {date:'Dec 30, 2025',desc:'New Year groceries',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:420,month:'2025-12'},
+  {date:'Dec 30, 2025',desc:'Lotion',cat:'Personal',acct:'Cash',who:'Self',amt:259,month:'2025-12'},
+  {date:'Dec 31, 2025',desc:'NYE dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:850,month:'2025-12'},
+  {date:'Dec 31, 2025',desc:'Streaming sub',cat:'Entertainment',acct:'Bank',who:'Self',amt:270,month:'2025-12'},
+
+  // JANUARY 2026
+  {date:'Jan 1, 2026',desc:'New Year lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:320,month:'2026-01'},
+  {date:'Jan 2, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:56,month:'2026-01'},
+  {date:'Jan 2, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:130,month:'2026-01'},
+  {date:'Jan 3, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:110,month:'2026-01'},
+  {date:'Jan 4, 2026',desc:'Kos payment',cat:'Personal',acct:'Bank',who:'Self',amt:55800,month:'2026-01'},
+  {date:'Jan 4, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:25,month:'2026-01'},
+  {date:'Jan 5, 2026',desc:'Groceries',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:450,month:'2026-01'},
+  {date:'Jan 5, 2026',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:230,month:'2026-01'},
+  {date:'Jan 6, 2026',desc:'Textbooks',cat:'School',acct:'Cash',who:'Self',amt:780,month:'2026-01'},
+  {date:'Jan 6, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'Coffee shop study',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:160,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'Stationery',cat:'School',acct:'Cash',who:'Self',amt:210,month:'2026-01'},
+  {date:'Jan 8, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:95,month:'2026-01'},
+  {date:'Jan 8, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:22,month:'2026-01'},
+  {date:'Jan 9, 2026',desc:'Weekend brunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:350,month:'2026-01'},
+  {date:'Jan 9, 2026',desc:'Phone accessories',cat:'Personal',acct:'Cash',who:'Self',amt:299,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'Dinner with family',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:680,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:56,month:'2026-01'},
+  {date:'Jan 11, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:115,month:'2026-01'},
+  {date:'Jan 11, 2026',desc:'Cleaning supplies',cat:'Home expenses',acct:'Cash',who:'Self',amt:180,month:'2026-01'},
+  {date:'Jan 12, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:105,month:'2026-01'},
+  {date:'Jan 12, 2026',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Self',amt:210,month:'2026-01'},
+  {date:'Jan 13, 2026',desc:'School printing',cat:'School',acct:'Cash',who:'Self',amt:90,month:'2026-01'},
+  {date:'Jan 13, 2026',desc:'Snacks',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:88,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'Shampoo',cat:'Personal',acct:'Cash',who:'Self',amt:199,month:'2026-01'},
+  {date:'Jan 15, 2026',desc:'Lunch out',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:175,month:'2026-01'},
+  {date:'Jan 15, 2026',desc:'Phone bill',cat:'Personal',acct:'Bank',who:'Self',amt:599,month:'2026-01'},
+  {date:'Jan 16, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:140,month:'2026-01'},
+  {date:'Jan 16, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:22,month:'2026-01'},
+  {date:'Jan 17, 2026',desc:'Weekend grocery',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:380,month:'2026-01'},
+  {date:'Jan 17, 2026',desc:'Movie',cat:'Entertainment',acct:'Cash',who:'Self',amt:320,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:210,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2026-01'},
+  {date:'Jan 19, 2026',desc:'Study cafe',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:155,month:'2026-01'},
+  {date:'Jan 19, 2026',desc:'Home lightbulb',cat:'Home expenses',acct:'Cash',who:'Self',amt:89,month:'2026-01'},
+  {date:'Jan 20, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:98,month:'2026-01'},
+  {date:'Jan 20, 2026',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Self',amt:185,month:'2026-01'},
+  {date:'Jan 21, 2026',desc:'Research materials',cat:'School',acct:'Cash',who:'Self',amt:340,month:'2026-01'},
+  {date:'Jan 21, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:125,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'Lotion',cat:'Personal',acct:'Cash',who:'Self',amt:259,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:56,month:'2026-01'},
+  {date:'Jan 23, 2026',desc:'Weekend lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:295,month:'2026-01'},
+  {date:'Jan 23, 2026',desc:'Streaming',cat:'Entertainment',acct:'Bank',who:'Self',amt:270,month:'2026-01'},
+  {date:'Jan 24, 2026',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:220,month:'2026-01'},
+  {date:'Jan 24, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Self',amt:22,month:'2026-01'},
+  {date:'Jan 25, 2026',desc:'Coffee shop',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:150,month:'2026-01'},
+  {date:'Jan 25, 2026',desc:'School notebook',cat:'School',acct:'Cash',who:'Self',amt:120,month:'2026-01'},
+  {date:'Jan 26, 2026',desc:'Grocery',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:340,month:'2026-01'},
+  {date:'Jan 26, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2026-01'},
+  {date:'Jan 27, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:100,month:'2026-01'},
+  {date:'Jan 27, 2026',desc:'Vitamins',cat:'Personal',acct:'Cash',who:'Self',amt:299,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'Dinner out',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:340,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Self',amt:195,month:'2026-01'},
+  {date:'Jan 29, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:135,month:'2026-01'},
+  {date:'Jan 29, 2026',desc:'Home detergent',cat:'Home expenses',acct:'Cash',who:'Self',amt:120,month:'2026-01'},
+  {date:'Jan 30, 2026',desc:'Lunch box',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:95,month:'2026-01'},
+  {date:'Jan 30, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Self',amt:28,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'Month-end grocery',cat:'Food & Drinks',acct:'Cash',who:'Self',amt:420,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'Face cream',cat:'Personal',acct:'Cash',who:'Self',amt:389,month:'2026-01'},
+];
+
+const INCOME = [
+  // DECEMBER 2025
+  {date:'Dec 1, 2025',desc:'Salary Dec',type:'Salary',acct:'Bank',who:'Employer',amt:18000,month:'2025-12'},
+  {date:'Dec 5, 2025',desc:'Freelance project',type:'Other',acct:'Bank',who:'Client A',amt:8000,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'Scholarship Q4',type:'Scholarship',acct:'Bank',who:'University',amt:4000,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'Debt repayment received',type:'Debt Payment',acct:'Cash',who:'Friend',amt:800,month:'2025-12'},
+  {date:'Dec 20, 2025',desc:'Part-time tutoring',type:'Other',acct:'Cash',who:'Student',amt:3200,month:'2025-12'},
+  {date:'Dec 22, 2025',desc:'Christmas bonus',type:'Salary',acct:'Bank',who:'Employer',amt:4837,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'Gift money',type:'Other',acct:'Cash',who:'Family',amt:5000,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Survey reward',type:'Other',acct:'Bank',who:'Research Co',amt:400,month:'2025-12'},
+  {date:'Dec 29, 2025',desc:'Resale item',type:'Other',acct:'Cash',who:'Buyer',amt:1200,month:'2025-12'},
+  {date:'Dec 30, 2025',desc:'Tutoring session',type:'Other',acct:'Cash',who:'Student',amt:800,month:'2025-12'},
+  {date:'Dec 31, 2025',desc:'Bank interest',type:'Other',acct:'Bank',who:'Bank',amt:13000,month:'2025-12'},
+
+  // JANUARY 2026
+  {date:'Jan 1, 2026',desc:'Bank bonus',type:'Other',acct:'Bank',who:'Bank',amt:5000,month:'2026-01'},
+  {date:'Jan 3, 2026',desc:'Salary Jan',type:'Salary',acct:'Bank',who:'Employer',amt:18000,month:'2026-01'},
+  {date:'Jan 5, 2026',desc:'Freelance design',type:'Other',acct:'Bank',who:'Client B',amt:12000,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'Investment return',type:'Other',acct:'Bank',who:'Investment Co',amt:8500,month:'2026-01'},
+  {date:'Jan 12, 2026',desc:'Resale phone',type:'Other',acct:'Cash',who:'Buyer',amt:3500,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'Survey reward',type:'Other',acct:'Bank',who:'Research Co',amt:300,month:'2026-01'},
+  {date:'Jan 15, 2026',desc:'Part-time work',type:'Other',acct:'Cash',who:'Company',amt:5000,month:'2026-01'},
+  {date:'Jan 16, 2026',desc:'Tutoring session',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'Freelance writing',type:'Other',acct:'Bank',who:'Magazine',amt:2800,month:'2026-01'},
+  {date:'Jan 20, 2026',desc:'Commission',type:'Salary',acct:'Bank',who:'Employer',amt:4837,month:'2026-01'},
+  {date:'Jan 21, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'Resale clothes',type:'Other',acct:'Cash',who:'Buyer',amt:800,month:'2026-01'},
+  {date:'Jan 23, 2026',desc:'Survey',type:'Other',acct:'Bank',who:'Research Co',amt:300,month:'2026-01'},
+  {date:'Jan 24, 2026',desc:'Part-time',type:'Other',acct:'Cash',who:'Company',amt:5000,month:'2026-01'},
+  {date:'Jan 25, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 26, 2026',desc:'Freelance edit',type:'Other',acct:'Bank',who:'Client C',amt:3500,month:'2026-01'},
+  {date:'Jan 27, 2026',desc:'Resale item',type:'Other',acct:'Cash',who:'Buyer',amt:612,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 29, 2026',desc:'Bank interest',type:'Other',acct:'Bank',who:'Bank',amt:3200,month:'2026-01'},
+  {date:'Jan 30, 2026',desc:'Survey',type:'Other',acct:'Bank',who:'Research Co',amt:400,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'End month bonus',type:'Other',acct:'Bank',who:'Employer',amt:37200,month:'2026-01'},
+];
+
+const TRANSFERS = [
+  {date:'Dec 5, 2025',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:3000,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:2000,month:'2025-12'},
+  {date:'Dec 20, 2025',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:3000,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Savings transfer',from:'Bank',to:'Savings',amt:10000,month:'2025-12'},
+  {date:'Jan 3, 2026',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:3000,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:2000,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'Savings transfer',from:'Bank',to:'Savings',amt:5000,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:3000,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'ATM withdrawal',from:'Bank',to:'Cash',amt:2000,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'Savings transfer',from:'Bank',to:'Savings',amt:10000,month:'2026-01'},
+];
+
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
+const CAT_COLORS = {
+  'Food & Drinks': '#dc2626',
+  'Personal':      '#b91c1c',
+  'Transport':     '#10b981',
+  'Entertainment': '#f59e0b',
+  'Home expenses': '#7f1d1d',
+  'School':        '#06b6d4',
+  'Adjustments':   '#475569',
+};
+const INC_COLORS = {
+  'Salary':      '#10b981',
+  'Scholarship': '#8b5cf6',
+  'Debt Payment':'#dc2626',
+  'Other':       '#f59e0b',
+};
+const CAT_EMOJI = {'Food & Drinks':'🍜','Personal':'👤','Transport':'🚌','Entertainment':'🎬','Home expenses':'🏠','School':'📚','Adjustments':'⚙️'};
+const INC_EMOJI = {'Salary':'💰','Scholarship':'🎓','Debt Payment':'💸','Other':'📦'};
+
+const MONTHS = [
+  {key:'2025-12', label:'DEC 2025', year:'2025'},
+  {key:'2026-01', label:'JAN 2026', year:'2026'},
+  {key:'2026-02', label:'FEB 2026', year:'2026', soon:true, end:'Feb 28'},
+  {key:'2026-03', label:'MAR 2026', year:'2026', soon:true, end:'Mar 31'},
+  {key:'2026-04', label:'APR 2026', year:'2026', soon:true, end:'Apr 30'},
+  {key:'2026-05', label:'MAY 2026', year:'2026', soon:true, end:'May 31'},
+  {key:'2026-06', label:'JUN 2026', year:'2026', soon:true, end:'Jun 30'},
+  {key:'2026-07', label:'JUL 2026', year:'2026', soon:true, end:'Jul 31'},
+  {key:'2026-08', label:'AUG 2026', year:'2026', soon:true, end:'Aug 31'},
+  {key:'2026-09', label:'SEP 2026', year:'2026', soon:true, end:'Sep 30'},
+  {key:'2026-10', label:'OCT 2026', year:'2026', soon:true, end:'Oct 31'},
+  {key:'2026-11', label:'NOV 2026', year:'2026', soon:true, end:'Nov 30'},
+  {key:'2026-12', label:'DEC 2026', year:'2026', soon:true, end:'Dec 31'},
+];
+
+const YEARS = [
+  { key: '2025', label: '2025', months: ['2025-12'] },
+  { key: '2026', label: '2026', months: ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'] },
+];
+
+let activeView = 'monthly';
+let activeMonth = '2025-12';
+let activeYear = '2025';
+let chartInstances = {};
+
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
+const fmt = n => 'NT$' + Math.round(n).toLocaleString();
+const byMonth = (arr, m) => arr.filter(x => x.month === m);
+const sumArr = arr => arr.reduce((a,b) => a + (b.amt||0), 0);
+const groupBy = (arr, key) => {
+  const m = {};
+  arr.forEach(x => { m[x[key]] = (m[x[key]]||[]).concat(x); });
+  return m;
+};
+
+// ═══════════════════════════════════════════════
+//  VIEW SWITCHING
+// ═══════════════════════════════════════════════
+function setView(v, btn) {
+  activeView = v;
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-monthly').classList.toggle('hidden', v !== 'monthly');
+  document.getElementById('view-yearly').classList.toggle('hidden', v !== 'yearly');
+  if (v === 'monthly') renderMonthly();
+  else renderYearly();
+}
+
+function switchMonth(key, btn) {
+  const m = MONTHS.find(x => x.key === key);
+  if (m && m.soon) return;
+  activeMonth = key;
+  document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMonthly();
+}
+
+function openMonth(key) {
+  setView('monthly', document.querySelectorAll('.vbtn')[0]);
+  activeMonth = key;
+  document.querySelectorAll('.mtab').forEach(b => {
+    b.classList.toggle('active', b.dataset.key === key);
+  });
+  renderMonthly();
+}
+
+function switchYear(key, btn) {
+  activeYear = key;
+  document.querySelectorAll('.ytab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderYearlyContent();
+}
+
+// ═══════════════════════════════════════════════
+//  ACCORDION
+// ═══════════════════════════════════════════════
+function toggleBk(id, rowEl) {
+  const panel = document.getElementById(id);
+  const list = rowEl.closest('.bk-list');
+  const wasOpen = panel.classList.contains('open');
+  list.querySelectorAll('.bk-txns.open, .bk-row.open').forEach(el => el.classList.remove('open'));
+  if (!wasOpen) { panel.classList.add('open'); rowEl.classList.add('open'); }
+}
+
+// ═══════════════════════════════════════════════
+//  DONUT CHART
+// ═══════════════════════════════════════════════
+function drawDonut(canvasId, legendId, data, colorFn, emojiF, total) {
+  if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); delete chartInstances[canvasId]; }
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const keys = Object.keys(data);
+  const vals = keys.map(k => sumArr(data[k]));
+  const colors = keys.map(k => colorFn(k));
+
+  chartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: keys, datasets: [{ data: vals, backgroundColor: colors, borderColor: '#100a0a', borderWidth: 3 }] },
+    options: { cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: {
+      label: ctx => ` ${fmt(ctx.raw)} (${((ctx.raw/total)*100).toFixed(1)}%)`
+    }}}}
+  });
+
+  const leg = document.getElementById(legendId);
+  if (!leg) return;
+  leg.innerHTML = keys.map((k,i) => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${colors[i]}"></div>
+      <span class="legend-label">${emojiF(k)} ${k}</span>
+      <span class="legend-pct">${((vals[i]/total)*100).toFixed(0)}%</span>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════
+//  BREAKDOWN HTML
+// ═══════════════════════════════════════════════
+function buildBreakdown(grouped, colorFn, total, prefix, cols) {
+  const sorted = Object.entries(grouped).sort((a,b) => sumArr(b[1]) - sumArr(a[1]));
+  return `<div class="bk-list">${sorted.map(([cat, txns], i) => {
+    const s = sumArr(txns);
+    const id = `bk-${prefix}-${i}`;
+    const pct = total > 0 ? (s/total*100) : 0;
+    const color = colorFn(cat);
+    const rows = txns.map(t => `
+      <tr>
+        <td>${t.date||''}</td>
+        <td>${t.desc||''}</td>
+        <td>${t.acct||''}</td>
+        <td>${t.who||t.from||''}</td>
+        <td class="txn-amt" style="color:${color}">${fmt(t.amt)}</td>
+      </tr>
+    `).join('');
+    return `
+      <div class="bk-row" onclick="toggleBk('${id}',this)" data-id="${id}">
+        <div class="bk-cat">${CAT_EMOJI[cat]||INC_EMOJI[cat]||'•'} ${cat}</div>
+        <div class="bk-count">${txns.length} txn${txns.length>1?'s':''}</div>
+        <div class="bk-bar-wrap"><div class="bk-bar" style="width:${pct}%;background:${color}"></div></div>
+        <div class="bk-amt" style="color:${color}">${fmt(s)}</div>
+        <span class="bk-chevron">▼</span>
+      </div>
+      <div class="bk-txns" id="${id}">
+        <table>
+          <thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th style="text-align:right">Amount</th></tr></thead>
+          <tbody>
+            ${rows}
+            <tr class="subtotal"><td colspan="${cols.length}">Subtotal · ${txns.length} transaction${txns.length>1?'s':''}</td><td class="txn-amt amt-cell">${fmt(s)}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  FULL TABLE
+// ═══════════════════════════════════════════════
+function buildFullTable(txns, type) {
+  if (!txns.length) return '<p style="color:var(--text3);padding:16px;font-size:12px">No transactions</p>';
+  if (type === 'expense') {
+    return `<table class="full"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th>Who</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+      ${txns.map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td><span class="tag" style="color:${CAT_COLORS[t.cat]||'#aaa'};border-color:${CAT_COLORS[t.cat]||'#aaa'}20">${t.cat}</span></td><td>${t.acct}</td><td>${t.who}</td><td class="txn-amt" style="color:var(--accent4)">${fmt(t.amt)}</td></tr>`).join('')}
+    </tbody></table>`;
+  } else if (type === 'income') {
+    return `<table class="full"><thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Account</th><th>Who</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+      ${txns.map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td><span class="tag" style="color:${INC_COLORS[t.type]||'#aaa'};border-color:${INC_COLORS[t.type]||'#aaa'}20">${t.type}</span></td><td>${t.acct}</td><td>${t.who}</td><td class="txn-amt" style="color:var(--accent2)">${fmt(t.amt)}</td></tr>`).join('')}
+    </tbody></table>`;
+  } else {
+    return `<table class="full"><thead><tr><th>Date</th><th>Description</th><th>From</th><th>To</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+      ${txns.map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td>${t.from}</td><td>${t.to}</td><td class="txn-amt" style="color:var(--accent3)">${fmt(t.amt)}</td></tr>`).join('')}
+    </tbody></table>`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER MONTHLY
+// ═══════════════════════════════════════════════
+function renderMonthly() {
+  const exp = byMonth(EXPENSES, activeMonth);
+  const inc = byMonth(INCOME, activeMonth);
+  const trn = byMonth(TRANSFERS, activeMonth);
+  const totalExp = sumArr(exp);
+  const totalInc = sumArr(inc);
+  const totalTrn = sumArr(trn);
+  const net = totalInc - totalExp;
+  const isPos = net >= 0;
+
+  const catGroup = groupBy(exp, 'cat');
+  const incGroup = groupBy(inc, 'type');
+  const mLabel = MONTHS.find(m => m.key === activeMonth)?.label || activeMonth;
+
+  document.getElementById('monthly-content').innerHTML = `
+    <div class="section-title" style="margin-top:0">${mLabel} — SUMMARY</div>
+    <div class="stat-row">
+      <div class="stat-card green" style="animation-delay:0s">
+        <div class="stat-watermark">😸</div>
+        <div class="stat-label">Total Income</div>
+        <div class="stat-val pos">${fmt(totalInc)}</div>
+        <div class="stat-sub">${inc.length} transactions</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.05s">
+        <div class="stat-watermark">🙀</div>
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-val red">${fmt(totalExp)}</div>
+        <div class="stat-sub">${exp.length} transactions</div>
+      </div>
+      <div class="stat-card amber" style="animation-delay:0.1s">
+        <div class="stat-watermark">😺</div>
+        <div class="stat-label">Transfers</div>
+        <div class="stat-val" style="color:var(--accent3)">${fmt(totalTrn)}</div>
+        <div class="stat-sub">${trn.length} transactions</div>
+      </div>
+      <div class="stat-card ${isPos?'green':'neg'}" style="animation-delay:0.15s">
+        <div class="stat-watermark">${isPos?'😻':'😿'}</div>
+        <div class="stat-label">Net Savings</div>
+        <div class="stat-val ${isPos?'pos':'neg-color'}">${isPos?'+':''}${fmt(net)}</div>
+        <div class="stat-sub">Savings rate ${totalInc>0?((net/totalInc)*100).toFixed(1):0}%</div>
+      </div>
+    </div>
+
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-title">Expense Breakdown</div>
+        <div class="chart-inner">
+          <div class="chart-canvas-wrap"><canvas id="chart-exp"></canvas></div>
+          <div class="chart-legend" id="legend-exp"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Income Sources</div>
+        <div class="chart-inner">
+          <div class="chart-canvas-wrap"><canvas id="chart-inc"></canvas></div>
+          <div class="chart-legend" id="legend-inc"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Expense Categories</div>
+    ${buildBreakdown(catGroup, k => CAT_COLORS[k]||'#dc2626', totalExp, 'exp-'+activeMonth, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">Income Breakdown</div>
+    ${buildBreakdown(incGroup, k => INC_COLORS[k]||'#10b981', totalInc, 'inc-'+activeMonth, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">All Expenses</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head"><h3>Expenses</h3><span class="count">${exp.length} entries · ${fmt(totalExp)}</span></div>
+      ${buildFullTable(exp,'expense')}
+    </div>
+
+    <div class="section-title">All Income</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head"><h3>Income</h3><span class="count">${inc.length} entries · ${fmt(totalInc)}</span></div>
+      ${buildFullTable(inc,'income')}
+    </div>
+
+    <div class="section-title">All Transfers</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head"><h3>Transfers</h3><span class="count">${trn.length} entries · ${fmt(totalTrn)}</span></div>
+      ${buildFullTable(trn,'transfer')}
+    </div>
+  `;
+
+  if (Object.keys(catGroup).length) drawDonut('chart-exp','legend-exp',catGroup,k=>CAT_COLORS[k]||'#dc2626',k=>CAT_EMOJI[k]||'•',totalExp);
+  if (Object.keys(incGroup).length) drawDonut('chart-inc','legend-inc',incGroup,k=>INC_COLORS[k]||'#10b981',k=>INC_EMOJI[k]||'•',totalInc);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER YEARLY
+// ═══════════════════════════════════════════════
+function renderYearly() {
+  // Build year tabs
+  document.getElementById('year-tabs').innerHTML = YEARS.map(y => {
+    const hasData = y.months.some(m => !MONTHS.find(x=>x.key===m)?.soon);
+    return `<button class="ytab ${y.key===activeYear?'active':''} ${!hasData?'soon':''}" 
+      onclick="switchYear('${y.key}',this)">${y.label}</button>`;
+  }).join('');
+  renderYearlyContent();
+}
+
+function renderYearlyContent() {
+  const year = YEARS.find(y => y.key === activeYear);
+  const yearMonths = year.months;
+
+  // Gather all data for this year
+  const allExp = EXPENSES.filter(x => yearMonths.includes(x.month));
+  const allInc = INCOME.filter(x => yearMonths.includes(x.month));
+  const allTrn = TRANSFERS.filter(x => yearMonths.includes(x.month));
+  const totalExp = sumArr(allExp);
+  const totalInc = sumArr(allInc);
+  const totalTrn = sumArr(allTrn);
+  const net = totalInc - totalExp;
+  const isPos = net >= 0;
+
+  const completedMonths = yearMonths.filter(m => !MONTHS.find(x=>x.key===m)?.soon);
+  const catGroup = groupBy(allExp, 'cat');
+  const incGroup = groupBy(allInc, 'type');
+
+  document.getElementById('yearly-content').innerHTML = `
+    <div class="section-title" style="margin-top:0">${activeYear} — YEAR TO DATE</div>
+    <div class="year-stat-row">
+      <div class="stat-card green" style="animation-delay:0s">
+        <div class="stat-watermark">😸</div>
+        <div class="stat-label">YTD Income</div>
+        <div class="stat-val pos">${fmt(totalInc)}</div>
+        <div class="stat-sub">${allInc.length} transactions</div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.05s">
+        <div class="stat-watermark">🙀</div>
+        <div class="stat-label">YTD Expenses</div>
+        <div class="stat-val red">${fmt(totalExp)}</div>
+        <div class="stat-sub">${allExp.length} transactions</div>
+      </div>
+      <div class="stat-card amber" style="animation-delay:0.1s">
+        <div class="stat-watermark">😺</div>
+        <div class="stat-label">YTD Transfers</div>
+        <div class="stat-val" style="color:var(--accent3)">${fmt(totalTrn)}</div>
+        <div class="stat-sub">${allTrn.length} transactions</div>
+      </div>
+      <div class="stat-card ${isPos?'green':'neg'}" style="animation-delay:0.15s">
+        <div class="stat-watermark">${isPos?'😻':'😿'}</div>
+        <div class="stat-label">YTD Net</div>
+        <div class="stat-val ${isPos?'pos':'neg-color'}">${isPos?'+':''}${fmt(net)}</div>
+        <div class="stat-sub">${completedMonths.length} month${completedMonths.length!==1?'s':''} tracked</div>
+      </div>
+    </div>
+
+    ${completedMonths.length > 0 ? `
+    <div class="chart-row">
+      <div class="chart-card">
+        <div class="chart-title">${activeYear} Expense Breakdown</div>
+        <div class="chart-inner">
+          <div class="chart-canvas-wrap"><canvas id="ychart-exp"></canvas></div>
+          <div class="chart-legend" id="ylegend-exp"></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">${activeYear} Income Sources</div>
+        <div class="chart-inner">
+          <div class="chart-canvas-wrap"><canvas id="ychart-inc"></canvas></div>
+          <div class="chart-legend" id="ylegend-inc"></div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <div class="section-title">${activeYear} Monthly Breakdown</div>
+    <div class="month-grid">
+      ${yearMonths.map(mk => {
+        const mInfo = MONTHS.find(x => x.key === mk);
+        const mExp = sumArr(byMonth(EXPENSES, mk));
+        const mInc = sumArr(byMonth(INCOME, mk));
+        const mNet = mInc - mExp;
+        const isDataMonth = !mInfo?.soon;
+        const netCls = mNet >= 0 ? 'pos' : 'neg';
+        if (isDataMonth) {
+          return `<div class="mgrid-card clickable" onclick="openMonth('${mk}')">
+            <div class="mgrid-month">${mInfo?.label||mk}</div>
+            <div class="mgrid-row"><span class="lbl">Income</span><span class="val inc">${fmt(mInc)}</span></div>
+            <div class="mgrid-row"><span class="lbl">Expenses</span><span class="val exp">${fmt(mExp)}</span></div>
+            <div class="mgrid-row"><span class="lbl">Net</span><span class="val net ${netCls}">${mNet>=0?'+':''}${fmt(mNet)}</span></div>
+            <div><span class="mgrid-badge">VIEW REPORT →</span></div>
+          </div>`;
+        } else {
+          return `<div class="mgrid-card soon">
+            <div class="mgrid-month">${mInfo?.label||mk}</div>
+            <div class="mgrid-soon">COMING SOON</div>
+            <div class="mgrid-soon">ends ${mInfo?.end||''}</div>
+          </div>`;
+        }
+      }).join('')}
+    </div>
+
+    ${completedMonths.length > 0 ? `
+    <div class="section-title">YTD Expense Categories</div>
+    ${buildBreakdown(catGroup, k => CAT_COLORS[k]||'#dc2626', totalExp, 'y-exp-'+activeYear, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">YTD Income Breakdown</div>
+    ${buildBreakdown(incGroup, k => INC_COLORS[k]||'#10b981', totalInc, 'y-inc-'+activeYear, ['Date','Description','Account','Who'])}
+    ` : `<div style="color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:40px;text-align:center;border:1px solid var(--border);border-radius:6px;">
+      No data available for ${activeYear} yet. Data will appear as months are completed.
+    </div>`}
+  `;
+
+  if (completedMonths.length && Object.keys(catGroup).length) {
+    drawDonut('ychart-exp','ylegend-exp',catGroup,k=>CAT_COLORS[k]||'#dc2626',k=>CAT_EMOJI[k]||'•',totalExp);
+    drawDonut('ychart-inc','ylegend-inc',incGroup,k=>INC_COLORS[k]||'#10b981',k=>INC_EMOJI[k]||'•',totalInc);
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+function init() {
+  // Build month tabs
+  document.getElementById('month-tabs').innerHTML = MONTHS.map(m =>
+    `<button class="mtab ${m.key===activeMonth?'active':''} ${m.soon?'soon':''}" 
+      data-key="${m.key}"
+      onclick="switchMonth('${m.key}',this)">
+      ${m.label}
+      ${m.soon ? `<span class="soon-date">ends ${m.end}</span>` : ''}
+    </button>`
+  ).join('');
+
+  renderMonthly();
+
+  // Clock
+  setInterval(() => {
+    const n = new Date();
+    document.getElementById('live-time').textContent =
+      n.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) + ' · ' +
+      n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  }, 1000);
+}
+
+init();
+</script>
+</body>
+</html>
