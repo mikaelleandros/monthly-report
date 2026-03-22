@@ -3,971 +3,1350 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Finance Analytics 2026</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<title>Finance Report 2026</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
+
 :root {
-  --bg:       #0a0c0f;
-  --bg1:      #0f1218;
-  --bg2:      #141820;
-  --bg3:      #1a2030;
-  --border:   #1e2535;
-  --border2:  #252d3d;
-  --accent:   #3b82f6;
-  --accent2:  #10b981;
-  --accent3:  #f59e0b;
-  --accent4:  #ef4444;
-  --accent5:  #8b5cf6;
-  --text:     #e2e8f0;
-  --text2:    #94a3b8;
-  --text3:    #475569;
-  --mono:     'IBM Plex Mono', monospace;
-  --sans:     'IBM Plex Sans', sans-serif;
-  --glow:     0 0 20px rgba(59,130,246,0.15);
+  --bg:    #080608;
+  --bg1:   #100a0a;
+  --bg2:   #180d0d;
+  --bg3:   #221212;
+  --accent:  #dc2626;
+  --accent2: #10b981;
+  --accent3: #f59e0b;
+  --accent4: #ef4444;
+  --accent5: #b91c1c;
+  --text:  #e8dada;
+  --text2: #c4a8a8;
+  --text3: #7a5555;
+  --border: #2a1515;
+  --red-glow: rgba(220,38,38,0.15);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: var(--sans);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* ── SCANLINE TEXTURE ── */
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Grid background */
 body::after {
   content: '';
-  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-}
-
-/* ── GRID BACKGROUND ── */
-.grid-bg {
-  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  position: fixed;
+  inset: 0;
   background-image:
-    linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(220,38,38,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(220,38,38,0.04) 1px, transparent 1px);
   background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+.wrap { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 20px 80px; }
 
-/* ── TOP BAR ── */
-.topbar {
+/* HEADER */
+header {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 0;
+  padding: 20px 0 16px;
   border-bottom: 1px solid var(--border);
-  margin-bottom: 40px;
+  margin-bottom: 24px;
 }
-.topbar-left { display: flex; align-items: center; gap: 12px; }
-.logo-mark {
-  width: 32px; height: 32px; background: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; border-radius: 6px;
-  box-shadow: 0 0 16px rgba(59,130,246,0.4);
-}
-.topbar-title { font-family: var(--mono); font-size: 13px; font-weight: 600; letter-spacing: 0.1em; color: var(--text); }
-.topbar-sub   { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; }
-.topbar-right { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.status-dot   { display: inline-block; width: 6px; height: 6px; background: var(--accent2); border-radius: 50%; margin-right: 6px; animation: pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { font-size: 22px; }
+.logo-text { font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 600; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+.logo-sub { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1px; margin-top: 2px; }
+.header-meta { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); text-align: right; }
+.header-meta span { display: block; }
 
-/* ── SECTION TABS ── */
-.section-tabs {
-  display: flex; gap: 2px;
-  background: var(--bg1);
+/* VIEW TOGGLE */
+.view-toggle {
+  display: flex; gap: 4px;
+  background: var(--bg2);
   border: 1px solid var(--border);
-  border-radius: 8px;
   padding: 4px;
-  margin-bottom: 32px;
+  border-radius: 6px;
+  margin-bottom: 20px;
   width: fit-content;
 }
-.stab {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.08em; text-transform: uppercase;
-  padding: 8px 20px; border-radius: 5px; border: none;
-  background: transparent; color: var(--text3); cursor: pointer;
-  transition: all 0.15s;
+.vbtn {
+  background: none; border: none; cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600;
+  color: var(--text3); letter-spacing: 1px; text-transform: uppercase;
+  padding: 7px 18px; border-radius: 4px; transition: all 0.2s;
 }
-.stab:hover { color: var(--text2); }
-.stab.active { background: var(--bg3); color: var(--accent); border: 1px solid var(--border2); }
+.vbtn.active { background: var(--accent); color: #fff; }
+.vbtn:hover:not(.active) { color: var(--text); background: var(--bg3); }
 
-/* ── MONTH STRIP ── */
-.month-strip {
-  display: flex; gap: 6px; overflow-x: auto;
-  padding-bottom: 4px; margin-bottom: 36px;
-  scrollbar-width: none;
+/* MONTH TABS */
+.month-tabs {
+  display: flex; gap: 3px; flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
 }
-.month-strip::-webkit-scrollbar { display: none; }
 .mtab {
-  font-family: var(--mono); font-size: 10px; font-weight: 500;
-  letter-spacing: 0.06em; white-space: nowrap;
-  padding: 8px 16px; border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--bg1); color: var(--text3);
-  cursor: pointer; transition: all 0.15s; flex-shrink: 0;
-  text-align: center;
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500;
+  color: var(--text3); letter-spacing: 0.5px;
+  padding: 5px 10px; border-radius: 3px; transition: all 0.2s;
+  position: relative;
 }
-.mtab:hover:not(.coming):not(.active) { border-color: var(--border2); color: var(--text2); }
-.mtab.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: var(--glow); }
-.mtab.coming { cursor: not-allowed; opacity: 0.5; }
-.mtab.coming:hover { border-color: var(--border); color: var(--text3); }
-.mtab .mtab-name { display: block; }
-.mtab .mtab-sub  { display: block; font-size: 9px; color: inherit; opacity: 0.7; margin-top: 2px; }
-.mtab.coming .mtab-sub { color: var(--accent3); opacity: 1; }
+.mtab.active { border-color: var(--accent); color: var(--accent); background: rgba(220,38,38,0.08); }
+.mtab:hover:not(.active):not(.soon) { border-color: var(--text3); color: var(--text2); }
+.mtab.soon { opacity: 0.35; cursor: not-allowed; }
+.mtab .soon-date { display: block; font-size: 8px; color: var(--text3); margin-top: 2px; }
 
-/* ── STAT CARDS ── */
-.stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
-.scard {
+/* STAT CARDS */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card {
   background: var(--bg1); border: 1px solid var(--border);
-  border-radius: 8px; padding: 20px;
+  border-radius: 6px; padding: 18px;
   position: relative; overflow: hidden;
-  transition: border-color 0.2s, transform 0.2s;
+  animation: fadeUp 0.4s ease both;
 }
-.scard:hover { border-color: var(--border2); transform: translateY(-2px); }
-.scard::before {
+.stat-card::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--accent);
 }
-.scard.s-income::before   { background: var(--accent2); }
-.scard.s-expense::before  { background: var(--accent4); }
-.scard.s-transfer::before { background: var(--accent); }
-.scard.s-net::before      { background: var(--accent5); }
-.scard-label {
-  font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--text3); margin-bottom: 12px;
-  display: flex; align-items: center; gap: 6px;
+.stat-card.green::before { background: var(--accent2); }
+.stat-card.amber::before { background: var(--accent3); }
+.stat-card.neg::before { background: var(--accent4); }
+.stat-watermark {
+  position: absolute; right: 12px; bottom: 8px;
+  font-size: 28px; opacity: 0.12; pointer-events: none;
 }
-.scard-val {
-  font-family: var(--mono); font-size: 22px; font-weight: 600;
-  letter-spacing: -0.02em;
+.stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+.stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 22px; font-weight: 600; color: var(--text); }
+.stat-val.pos { color: var(--accent2); }
+.stat-val.neg-color { color: var(--accent4); }
+.stat-val.red { color: var(--accent); }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.stat-delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  margin-top: 6px; padding: 2px 7px; border-radius: 3px; font-weight: 600;
 }
-.s-income  .scard-val { color: var(--accent2); }
-.s-expense .scard-val { color: var(--accent4); }
-.s-transfer .scard-val { color: var(--accent); }
-.s-net .scard-val.pos { color: var(--accent2); }
-.s-net .scard-val.neg { color: var(--accent4); }
-.scard-meme {
-  position: absolute; bottom: 10px; right: 14px;
-  font-size: 22px; opacity: 0.18;
+.stat-delta.up      { color: #10b981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+.stat-delta.down    { color: #ef4444; background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.2); }
+.stat-delta.flat    { color: var(--text3); background: var(--bg3); border: 1px solid var(--border); }
+.stat-delta.up-bad  { color: #ef4444; background: rgba(239,68,68,0.1);  border: 1px solid rgba(239,68,68,0.2); }
+.stat-delta.down-good { color: #10b981; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── TWO COL ── */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-
-/* ── PANEL ── */
-.panel {
-  background: var(--bg1); border: 1px solid var(--border);
-  border-radius: 8px; overflow: hidden; margin-bottom: 16px;
+/* CHARTS */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; padding: 20px;
 }
-.panel-hd {
+.chart-title { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 16px; }
+.chart-inner { display: flex; align-items: center; gap: 20px; }
+.chart-canvas-wrap { width: 140px; height: 140px; flex-shrink: 0; }
+.chart-legend { flex: 1; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; font-size: 12px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.legend-label { color: var(--text2); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legend-pct { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); }
+
+/* CHART TOGGLE */
+.chart-type-toggle {
+  display: flex; gap: 3px; margin-bottom: 14px;
+}
+.ct-btn {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 9px; font-weight: 600;
+  color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 3px 10px; border-radius: 3px; transition: all 0.15s;
+}
+.ct-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(220,38,38,0.08); }
+.ct-btn:hover:not(.active) { color: var(--text2); border-color: var(--text3); }
+
+/* BAR CHART */
+.bar-chart-wrap { width: 100%; }
+.bar-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 9px;
+}
+.bar-label {
+  font-size: 12px; color: var(--text2); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  width: 130px; flex-shrink: 0;
+}
+.bar-track {
+  flex: 1; background: var(--bg3); border-radius: 2px; height: 16px;
+  position: relative; overflow: hidden;
+}
+.bar-fill {
+  height: 100%; border-radius: 2px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  display: flex; align-items: center; justify-content: flex-end; padding-right: 6px;
+}
+.bar-fill-val {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  color: rgba(255,255,255,0.85); white-space: nowrap;
+}
+.bar-pct {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  color: var(--text3); width: 36px; text-align: right; flex-shrink: 0;
+}
+
+/* COLLAPSIBLE TABLE */
+.txn-table-wrap { background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+.txn-table-head {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px; border-bottom: 1px solid var(--border);
-  background: var(--bg2);
+  padding: 14px 16px; background: var(--bg2);
+  cursor: pointer; user-select: none; transition: background 0.15s;
 }
-.panel-hd h3 {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2);
-}
-.panel-hd .badge {
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
-  color: var(--accent); background: rgba(59,130,246,0.1);
-  padding: 2px 10px; border-radius: 20px;
-}
-.panel-hd .badge.green { color: var(--accent2); background: rgba(16,185,129,0.1); }
-.panel-hd .badge.amber { color: var(--accent3); background: rgba(245,158,11,0.1); }
+.txn-table-head:hover { background: var(--bg3); }
+.txn-table-head h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.txn-table-head .head-right { display: flex; align-items: center; gap: 12px; }
+.txn-table-head .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); }
+.txn-table-head .tgl-chevron { font-size: 10px; color: var(--text3); transition: transform 0.2s; }
+.txn-table-head.open .tgl-chevron { transform: rotate(180deg); color: var(--accent); }
+.txn-table-body { display: none; border-top: 1px solid var(--border); }
+.txn-table-body.open { display: block; }
 
-/* ── CHARTS ── */
-.chart-wrap { padding: 20px; }
-.pie-layout { display: flex; align-items: center; gap: 20px; }
-.pie-layout canvas { flex-shrink: 0; }
-.leg { flex: 1; }
-.leg-item {
+/* BREAKDOWN TABLE */
+.section-title {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3);
+  letter-spacing: 1px; text-transform: uppercase;
+  margin-bottom: 12px; margin-top: 28px;
   display: flex; align-items: center; gap: 8px;
-  padding: 5px 0; border-bottom: 1px solid var(--border);
-  font-size: 12px;
 }
-.leg-item:last-child { border-bottom: none; }
-.leg-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-.leg-name { flex: 1; color: var(--text2); font-family: var(--mono); font-size: 11px; }
-.leg-pct  { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.leg-amt  { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text); margin-left: 8px; }
+.section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-/* ── BAR BREAKDOWN ACCORDION ── */
-.bk-list { padding: 8px 0; }
-.bk-item { border-bottom: 1px solid var(--border); }
-.bk-item:last-child { border-bottom: none; }
-
+.bk-list { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
 .bk-row {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 20px; cursor: pointer;
-  transition: background 0.12s;
+  display: grid; grid-template-columns: 1fr auto auto auto;
+  align-items: center; gap: 12px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.15s;
   user-select: none;
 }
-.bk-row:hover { background: rgba(255,255,255,0.03); }
-.bk-row.open   { background: rgba(59,130,246,0.05); }
+.bk-row:last-of-type { border-bottom: none; }
+.bk-row:hover { background: var(--bg2); }
+.bk-row.open { background: rgba(220,38,38,0.06); border-left: 2px solid var(--accent); }
+.bk-cat { font-size: 13px; font-weight: 500; }
+.bk-count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); }
+.bk-bar-wrap { width: 80px; background: var(--bg3); border-radius: 2px; height: 4px; }
+.bk-bar { height: 4px; border-radius: 2px; background: var(--accent); transition: width 0.4s ease; }
+.bk-amt { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; min-width: 90px; text-align: right; }
+.bk-chevron { font-size: 10px; color: var(--text3); transition: transform 0.2s; margin-left: 4px; }
+.bk-row.open .bk-chevron { transform: rotate(180deg); color: var(--accent); }
 
-.bk-chevron {
-  font-size: 9px; color: var(--text3); flex-shrink: 0;
-  transition: transform 0.2s; width: 12px; text-align: center;
-}
-.bk-row.open .bk-chevron { transform: rotate(90deg); color: var(--accent); }
-
-.bk-name { font-family: var(--mono); font-size: 11px; color: var(--text2); width: 124px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bk-track { flex: 1; height: 4px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
-.bk-fill  { height: 100%; border-radius: 2px; transition: width 0.7s cubic-bezier(.34,1.56,.64,1); }
-.bk-count { font-family: var(--mono); font-size: 10px; color: var(--text3); width: 44px; text-align: right; flex-shrink: 0; }
-.bk-amt   { font-family: var(--mono); font-size: 11px; font-weight: 600; width: 96px; text-align: right; flex-shrink: 0; }
-
-/* ── EXPANDED TRANSACTIONS ── */
 .bk-txns {
-  display: none;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
+  display: none; border-bottom: 1px solid var(--border);
+  animation: slideDown 0.2s ease;
 }
 .bk-txns.open { display: block; }
-.bk-txn-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-.bk-txn-table th {
-  font-family: var(--mono); font-size: 9px; font-weight: 600;
-  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3);
-  padding: 7px 20px 7px 40px; text-align: left;
-  background: var(--bg); border-bottom: 1px solid var(--border);
-}
-.bk-txn-table th:last-child { text-align: right; padding-right: 20px; }
-.bk-txn-table td {
-  padding: 7px 20px 7px 40px;
-  border-bottom: 1px solid rgba(30,37,53,0.7);
-  color: var(--text2); vertical-align: middle;
-}
-.bk-txn-table td:last-child { text-align: right; padding-right: 20px; }
-.bk-txn-table tr:last-child td { border-bottom: none; }
-.bk-txn-table tr:hover td { background: rgba(255,255,255,0.02); }
-.bk-txn-table .td-date { font-family: var(--mono); font-size: 10px; color: var(--text3); width: 60px; }
-.bk-txn-table .td-name { color: var(--text); font-size: 11px; }
-.bk-txn-table .td-acc  { font-family: var(--mono); font-size: 10px; color: var(--text3); }
-.bk-txn-table .td-amt  { font-family: var(--mono); font-size: 11px; font-weight: 600; }
-.bk-subtotal {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 20px 8px 40px;
-  border-top: 1px solid var(--border2);
-  background: var(--bg);
-}
-.bk-subtotal span { font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.08em; }
-.bk-subtotal strong { font-family: var(--mono); font-size: 12px; font-weight: 600; }
+@keyframes slideDown { from { opacity: 0; } to { opacity: 1; } }
 
-/* ── TABLES ── */
-.tbl-scroll { overflow-x: auto; max-height: 340px; overflow-y: auto; }
-.tbl-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
-.tbl-scroll::-webkit-scrollbar-track { background: var(--bg2); }
-.tbl-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
-thead th {
-  font-family: var(--mono); font-size: 9px; font-weight: 600;
-  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3);
-  padding: 10px 16px; text-align: left; background: var(--bg2);
-  position: sticky; top: 0; border-bottom: 1px solid var(--border);
+.bk-txns table { width: 100%; border-collapse: collapse; }
+.bk-txns th {
+  font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3);
+  letter-spacing: 0.5px; text-transform: uppercase;
+  padding: 8px 16px; text-align: left; background: var(--bg2);
+  border-bottom: 1px solid var(--border);
 }
-tbody td { padding: 9px 16px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: middle; }
-tbody tr:last-child td { border-bottom: none; }
-tbody tr:hover td { background: rgba(255,255,255,0.02); }
-.td-date  { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; }
-.td-name  { color: var(--text); font-size: 12px; }
-.td-amt   { font-family: var(--mono); font-size: 12px; font-weight: 600; text-align: right; white-space: nowrap; }
-.td-acc   { font-family: var(--mono); font-size: 10px; color: var(--text3); }
-.pill {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: 3px;
-  font-family: var(--mono); font-size: 10px; font-weight: 500;
+.bk-txns td { padding: 8px 16px; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(42,21,21,0.5); }
+.bk-txns tr:last-child td { border-bottom: none; }
+.bk-txns tr:hover td { background: var(--bg2); color: var(--text); }
+.bk-txns .subtotal td { background: var(--bg2); color: var(--text3); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 600; border-top: 1px solid var(--border); }
+.bk-txns .subtotal .amt-cell { color: var(--accent); }
+.txn-amt { font-family: 'IBM Plex Mono', monospace; font-size: 12px; text-align: right; }
+
+/* FULL TRANSACTION TABLES */
+.txn-table-wrap { background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
+.txn-table-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; border-bottom: 1px solid var(--border); background: var(--bg2);
+}
+.txn-table-head h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+.txn-table-head .count { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); }
+table.full { width: 100%; border-collapse: collapse; }
+table.full th { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+table.full th:hover { color: var(--text2); }
+table.full td { padding: 8px 14px; font-size: 12px; color: var(--text2); border-bottom: 1px solid rgba(42,21,21,0.4); }
+table.full tr:last-child td { border-bottom: none; }
+table.full tr:hover td { background: var(--bg2); color: var(--text); }
+.tag {
+  display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 10px;
+  padding: 2px 7px; border-radius: 3px; border: 1px solid; white-space: nowrap;
+}
+
+/* YEARLY VIEW */
+.year-tabs {
+  display: flex; gap: 4px; margin-bottom: 24px;
+}
+.ytab {
+  background: none; border: 1px solid var(--border); cursor: pointer;
+  font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600;
+  color: var(--text3); letter-spacing: 2px;
+  padding: 10px 28px; border-radius: 4px; transition: all 0.2s;
+}
+.ytab.active { border-color: var(--accent); color: var(--accent); background: rgba(220,38,38,0.08); }
+.ytab:hover:not(.active):not(.soon) { border-color: var(--text3); color: var(--text2); }
+.ytab.soon { opacity: 0.35; cursor: not-allowed; }
+
+.year-stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+
+.month-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+.mgrid-card {
+  background: var(--bg1); border: 1px solid var(--border); border-radius: 6px; padding: 16px;
+  transition: all 0.2s;
+}
+.mgrid-card.clickable { cursor: pointer; }
+.mgrid-card.clickable:hover { border-color: var(--accent); background: rgba(220,38,38,0.04); }
+.mgrid-card.soon { opacity: 0.4; }
+.mgrid-month { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 10px; }
+.mgrid-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 12px; }
+.mgrid-row .lbl { color: var(--text3); }
+.mgrid-row .val { font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+.mgrid-row .val.inc { color: var(--accent2); }
+.mgrid-row .val.exp { color: var(--accent4); }
+.mgrid-row .val.net.pos { color: var(--accent2); }
+.mgrid-row .val.net.neg { color: var(--accent4); }
+.mgrid-soon { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 6px; }
+.mgrid-badge { display: inline-block; font-family: 'IBM Plex Mono', monospace; font-size: 8px; padding: 1px 5px; border-radius: 2px; background: rgba(220,38,38,0.15); color: var(--accent); border: 1px solid rgba(220,38,38,0.3); margin-top: 4px; }
+
+/* TICKER */
+.ticker-wrap {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--bg2); border-top: 1px solid var(--border);
+  height: 32px; overflow: hidden; z-index: 100;
+}
+.ticker {
+  display: flex; align-items: center; height: 100%;
   white-space: nowrap;
+  animation: tickerScroll 60s linear infinite;
+}
+.ticker-item { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--text3); padding: 0 40px; }
+.ticker-item span { color: var(--accent); }
+@keyframes tickerScroll {
+  from { transform: translateX(100vw); }
+  to   { transform: translateX(-100%); }
 }
 
-/* ── YEARLY GRID ── */
-.year-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
-.ym-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 6px; padding: 16px; transition: border-color 0.2s;
-}
-.ym-card.has-data { cursor: pointer; }
-.ym-card.has-data:hover { border-color: var(--accent); }
-.ym-card.no-data { opacity: 0.45; }
-.ym-title { font-family: var(--mono); font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
-.ym-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.ym-key { font-family: var(--mono); font-size: 10px; color: var(--text3); }
-.ym-val { font-family: var(--mono); font-size: 10px; font-weight: 600; }
-.ym-bar { height: 3px; background: var(--bg3); border-radius: 2px; margin-top: 8px; overflow: hidden; }
-.ym-bar-fill { height: 100%; border-radius: 2px; }
-.ym-coming {
-  font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em;
-  text-transform: uppercase; color: var(--accent3);
-  display: flex; align-items: center; gap: 4px; margin-top: 6px;
-}
-.ym-end { font-family: var(--mono); font-size: 9px; color: var(--text3); margin-top: 2px; }
+/* HIDDEN */
+.hidden { display: none !important; }
 
-/* ── CAT MEME TOOLTIP ── */
-.meme-strip {
-  display: flex; gap: 12px; overflow: hidden;
-  padding: 12px 20px; border-top: 1px solid var(--border);
-  background: var(--bg);
-}
-.meme-item {
-  font-family: var(--mono); font-size: 11px; color: var(--text3);
-  white-space: nowrap; animation: ticker 30s linear infinite;
-}
-@keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-
-/* ── COMING SOON SCREEN ── */
-.coming-screen {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; padding: 80px 20px;
-  text-align: center;
-}
-.coming-screen .cs-emoji { font-size: 56px; margin-bottom: 20px; animation: sway 2s ease-in-out infinite; }
-@keyframes sway { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
-.coming-screen h2 { font-family: var(--mono); font-size: 22px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
-.coming-screen p  { font-family: var(--mono); font-size: 12px; color: var(--text3); }
-.coming-screen .cs-date { font-family: var(--mono); font-size: 14px; color: var(--accent3); font-weight: 600; margin-top: 12px; }
-
-/* ── ANIMATIONS ── */
-.fade { animation: fd 0.35s ease both; }
-@keyframes fd { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-.d1{animation-delay:.04s} .d2{animation-delay:.08s} .d3{animation-delay:.12s} .d4{animation-delay:.16s}
-
-/* ── RESPONSIVE ── */
-@media(max-width:900px){
-  .stat-row{grid-template-columns:1fr 1fr}
-  .two-col,.three-col{grid-template-columns:1fr}
-  .year-grid{grid-template-columns:1fr 1fr}
-  .pie-layout{flex-direction:column}
-}
-@media(max-width:600px){
-  .stat-row{grid-template-columns:1fr 1fr}
-  .year-grid{grid-template-columns:1fr}
+/* RESPONSIVE */
+@media (max-width: 700px) {
+  .stat-row, .year-stat-row { grid-template-columns: 1fr 1fr; }
+  .chart-row { grid-template-columns: 1fr; }
+  .month-grid { grid-template-columns: 1fr 1fr; }
 }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
-
 <div class="wrap">
 
-<!-- TOP BAR -->
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="logo-mark">🐱</div>
-    <div>
-      <div class="topbar-title">FINANCE ANALYTICS</div>
-      <div class="topbar-sub">PERSONAL · NT$ · 2025–2026</div>
+  <header>
+    <div class="logo">
+      <span class="logo-icon">🐱</span>
+      <div>
+        <div class="logo-text">Finance Report</div>
+        <div class="logo-sub">NT$ · PERSONAL TRACKER · 2025–2026</div>
+      </div>
     </div>
+    <div class="header-meta">
+      <span id="live-time">—</span>
+      <span style="margin-top:3px">SYSTEM NOMINAL</span>
+    </div>
+  </header>
+
+  <div class="view-toggle">
+    <button class="vbtn active" onclick="setView('monthly',this)">Monthly View</button>
+    <button class="vbtn" onclick="setView('yearly',this)">Yearly Overview</button>
   </div>
-  <div class="topbar-right">
-    <span class="status-dot"></span>DATA CURRENT
+
+  <!-- ═══════════════════ MONTHLY VIEW ═══════════════════ -->
+  <div id="view-monthly">
+    <div class="month-tabs" id="month-tabs"></div>
+    <div id="monthly-content"></div>
   </div>
+
+  <!-- ═══════════════════ YEARLY VIEW ═══════════════════ -->
+  <div id="view-yearly" class="hidden">
+    <div class="year-tabs" id="year-tabs"></div>
+    <div id="yearly-content"></div>
+  </div>
+
 </div>
 
-<!-- SECTION TABS -->
-<div class="section-tabs">
-  <button class="stab active" onclick="setView('monthly',this)">MONTHLY VIEW</button>
-  <button class="stab" onclick="setView('yearly',this)">YEARLY OVERVIEW</button>
-</div>
-
-<!-- MONTH STRIP (shown in monthly view) -->
-<div class="month-strip" id="monthStrip"></div>
-
-<!-- MAIN CONTENT -->
-<div id="content"></div>
-
-<!-- CAT TICKER -->
-<div style="background:var(--bg1);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:24px">
-  <div style="padding:8px 20px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:9px;letter-spacing:0.12em;color:var(--text3)">// CAT_WISDOM.LOG</div>
-  <div style="overflow:hidden;white-space:nowrap;padding:10px 0">
-    <span style="display:inline-block;animation:ticker 40s linear infinite;font-family:var(--mono);font-size:11px;color:var(--text3)">
-      &nbsp;&nbsp;&nbsp;&nbsp;🐱 "I can has budget?" — anonymous cat &nbsp;·&nbsp; 📊 Spending tracked. Cat approved. &nbsp;·&nbsp; 😾 Your wallet when you check expenses &nbsp;·&nbsp; 🐈 "Did I buy that? ...yes." &nbsp;·&nbsp; 💸 Money go brr. Cat go nom. &nbsp;·&nbsp; 📉 Graph goes down. Cat judges silently. &nbsp;·&nbsp; 😼 Savings rate: meow% &nbsp;·&nbsp; 🐱 "I can has budget?" — anonymous cat &nbsp;·&nbsp; 📊 Spending tracked. Cat approved. &nbsp;·&nbsp; 😾 Your wallet when you check expenses &nbsp;·&nbsp; 🐈 "Did I buy that? ...yes." &nbsp;·&nbsp; 💸 Money go brr. Cat go nom. &nbsp;·&nbsp; 📉 Graph goes down. Cat judges silently. &nbsp;·&nbsp; 😼 Savings rate: meow%
-    </span>
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker">
+    <span class="ticker-item">🐱 <span>"I can has budget?"</span> — anonymous cat</span>
+    <span class="ticker-item">📊 Spending tracked. Cat approved.</span>
+    <span class="ticker-item">😾 Your wallet when you check expenses</span>
+    <span class="ticker-item">🐈 <span>"Did I buy that? ...yes."</span></span>
+    <span class="ticker-item">💸 Money go brr. Cat go nom.</span>
+    <span class="ticker-item">📉 Graph goes down. Cat judges silently.</span>
+    <span class="ticker-item">😼 <span>Savings rate: meow%</span></span>
+    <span class="ticker-item">🔴 Red is not just the theme — it's the vibe.</span>
+    <span class="ticker-item">📈 NT$ tracked. Cat satisfied.</span>
+    <span class="ticker-item">😺 <span>Budget balanced. Treat yourself. Maybe.</span></span>
   </div>
 </div>
-
-</div><!-- /wrap -->
 
 <script>
-// ──────────────────────────────────────────────
-// DATA
-// ──────────────────────────────────────────────
-const DATA = {"expenses":[{"date":"Dec 1","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 1","month":"2025-12","name":"Belajar","amount":3203.0,"category":"School","account":"Post Office Bank","who":"Me"},{"date":"Dec 1","month":"2025-12","name":"Lunch","amount":75.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 1","month":"2025-12","name":"Dinner","amount":106.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 2","month":"2025-12","name":"Cuci baju","amount":20.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Dec 2","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 2","month":"2025-12","name":"Lunch","amount":64.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 2","month":"2025-12","name":"Dinner","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 3","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 3","month":"2025-12","name":"Lunch","amount":63.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 3","month":"2025-12","name":"Cereal","amount":70.0,"category":"Food & Drinks","account":"Cash","who":""},{"date":"Dec 3","month":"2025-12","name":"Dinner","amount":91.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 1","month":"2025-12","name":"Micro Econ paper","amount":15.0,"category":"School","account":"Cash","who":"Me"},{"date":"Dec 4","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 4","month":"2025-12","name":"Lunch","amount":74.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 4","month":"2025-12","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 5","month":"2025-12","name":"Breakfast","amount":45.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 5","month":"2025-12","name":"Lunch","amount":90.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 6","month":"2025-12","name":"Breakfast","amount":31.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 6","month":"2025-12","name":"Dinner","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 8","month":"2025-12","name":"Lunch","amount":75.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 8","month":"2025-12","name":"Handuk","amount":223.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 8","month":"2025-12","name":"Minum","amount":31.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 9","month":"2025-12","name":"Cuci baju","amount":20.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Dec 9","month":"2025-12","name":"Lunch","amount":99.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 9","month":"2025-12","name":"Dinner","amount":95.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 10","month":"2025-12","name":"Breakfast","amount":45.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 10","month":"2025-12","name":"Lunch","amount":78.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 10","month":"2025-12","name":"Dinner","amount":90.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 10","month":"2025-12","name":"Stok mie","amount":170.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 10","month":"2025-12","name":"Kertas kado","amount":16.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 11","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 11","month":"2025-12","name":"Lunch","amount":82.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 11","month":"2025-12","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 12","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 12","month":"2025-12","name":"Lunch","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 12","month":"2025-12","name":"Dinner","amount":40.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 13","month":"2025-12","name":"Lunch","amount":95.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 13","month":"2025-12","name":"Christmas OCSA","amount":150.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 15","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 14","month":"2025-12","name":"Detergent","amount":49.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Dec 15","month":"2025-12","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 15","month":"2025-12","name":"Dinner","amount":90.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 16","month":"2025-12","name":"Cuci baju","amount":20.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Dec 16","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 16","month":"2025-12","name":"Lunch","amount":68.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 16","month":"2025-12","name":"Dinner","amount":110.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 17","month":"2025-12","name":"Lunch","amount":66.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 17","month":"2025-12","name":"Dinner","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 18","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 18","month":"2025-12","name":"Lunch","amount":64.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 18","month":"2025-12","name":"renang edbert","amount":40.0,"category":"Adjustments","account":"ID Card","who":"Me"},{"date":"Dec 18","month":"2025-12","name":"Dinner","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 19","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 20","month":"2025-12","name":"Cuci baju","amount":40.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Dec 20","month":"2025-12","name":"Lunch","amount":85.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Lunch","amount":68.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Bus","amount":25.0,"category":"Personal","account":"ID Card","who":""},{"date":"Dec 22","month":"2025-12","name":"Bus","amount":26.0,"category":"Personal","account":"ID Card","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Bus","amount":50.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Exchange gereja","amount":140.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 22","month":"2025-12","name":"Sabun","amount":139.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 23","month":"2025-12","name":"Kuota","amount":1420.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 23","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 23","month":"2025-12","name":"Lunch","amount":50.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 23","month":"2025-12","name":"Snack roti","amount":30.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 24","month":"2025-12","name":"Lunch","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 24","month":"2025-12","name":"Dinner","amount":40.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 25","month":"2025-12","name":"Dinner","amount":50.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 25","month":"2025-12","name":"Dinner","amount":85.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 26","month":"2025-12","name":"Cuci baju","amount":20.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Dec 26","month":"2025-12","name":"Kartu & T-pass ricky","amount":350.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Dec 26","month":"2025-12","name":"T pass","amount":199.0,"category":"Personal","account":"ID Card","who":"Me"},{"date":"Dec 26","month":"2025-12","name":"Dinner","amount":105.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 26","month":"2025-12","name":"Sprite","amount":30.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 27","month":"2025-12","name":"Lunch","amount":50.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 27","month":"2025-12","name":"Dinner","amount":97.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 27","month":"2025-12","name":"Es krim","amount":20.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 29","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 29","month":"2025-12","name":"Lunch","amount":84.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 29","month":"2025-12","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 30","month":"2025-12","name":"Lunch","amount":69.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 30","month":"2025-12","name":"Dinner","amount":130.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 30","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 31","month":"2025-12","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 31","month":"2025-12","name":"Lunch","amount":50.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Dec 31","month":"2025-12","name":"Dinner","amount":368.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 1","month":"2026-01","name":"Minum","amount":26.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 1","month":"2026-01","name":"Adjustment","amount":172.0,"category":"Adjustments","account":"Cash","who":"Me"},{"date":"Jan 1","month":"2026-01","name":"Dinner","amount":110.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 2","month":"2026-01","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 2","month":"2026-01","name":"Lunch","amount":66.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 2","month":"2026-01","name":"Dinner","amount":220.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 2","month":"2026-01","name":"Sarung Tangan","amount":99.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Jan 2","month":"2026-01","name":"Cuci Baju","amount":20.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Jan 3","month":"2026-01","name":"Lunch","amount":105.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 3","month":"2026-01","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 4","month":"2026-01","name":"Lunch","amount":85.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 4","month":"2026-01","name":"Tiket kerta","amount":3390.0,"category":"Transport","account":"Post Office Bank","who":"Me"},{"date":"Jan 5","month":"2026-01","name":"Breakfast","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 5","month":"2026-01","name":"Kos","amount":55800.0,"category":"Personal","account":"Post Office Bank","who":""},{"date":"Jan 5","month":"2026-01","name":"Lunch","amount":99.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 5","month":"2026-01","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 5","month":"2026-01","name":"minum","amount":60.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 5","month":"2026-01","name":"print work permit","amount":6.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Jan 6","month":"2026-01","name":"Lunch","amount":91.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 6","month":"2026-01","name":"Dinner pt.1","amount":30.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 6","month":"2026-01","name":"Kereta MRT","amount":75.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 7","month":"2026-01","name":"Breakfast","amount":60.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 7","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 7","month":"2026-01","name":"Dinner","amount":158.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 8","month":"2026-01","name":"Brunch","amount":120.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 8","month":"2026-01","name":"Main","amount":20.0,"category":"Entertainment","account":"Cash","who":"Me"},{"date":"Jan 8","month":"2026-01","name":"Baju","amount":818.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Jan 8","month":"2026-01","name":"Dinner","amount":80.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 8","month":"2026-01","name":"Minum","amount":55.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 8","month":"2026-01","name":"Cereal","amount":99.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 9","month":"2026-01","name":"Dinner","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 9","month":"2026-01","name":"Minum lembur","amount":38.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 9","month":"2026-01","name":"Kereta","amount":75.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 10","month":"2026-01","name":"Breakfast","amount":60.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 10","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 10","month":"2026-01","name":"Dinner","amount":155.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 11","month":"2026-01","name":"Breakfast","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 11","month":"2026-01","name":"Lunch","amount":91.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 11","month":"2026-01","name":"Dinner","amount":129.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 11","month":"2026-01","name":"Breakfast","amount":36.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 12","month":"2026-01","name":"Dinner","amount":135.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 12","month":"2026-01","name":"Cuci Baju","amount":160.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Jan 13","month":"2026-01","name":"Breakfast","amount":65.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 13","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 13","month":"2026-01","name":"Dinner","amount":135.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 14","month":"2026-01","name":"Breakfast","amount":59.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 14","month":"2026-01","name":"snack lembur","amount":35.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 14","month":"2026-01","name":"Kereta MRT","amount":75.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"MRT","amount":30.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"Dinner","amount":165.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"Baju","amount":400.0,"category":"Personal","account":"Post Office Bank","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"Meza star","amount":120.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"Bus + MRT","amount":48.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"Dinner","amount":130.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 15","month":"2026-01","name":"Air","amount":22.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"Breakfast","amount":85.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"MRT","amount":25.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"Susu + air","amount":149.0,"category":"Food & Drinks","account":"ID Card","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"Pokemon","amount":450.0,"category":"Personal","account":"Cash","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"MRT + bus","amount":33.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"Bus + MRT","amount":48.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 16","month":"2026-01","name":"Dinner","amount":305.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 17","month":"2026-01","name":"Breakfast","amount":125.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 17","month":"2026-01","name":"Hard drive","amount":1472.0,"category":"Personal","account":"Post Office Bank","who":"Me"},{"date":"Jan 17","month":"2026-01","name":"Bus","amount":36.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 17","month":"2026-01","name":"Dinner","amount":228.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 18","month":"2026-01","name":"Breakfast","amount":120.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 18","month":"2026-01","name":"Capit","amount":100.0,"category":"Entertainment","account":"Cash","who":"Me"},{"date":"Jan 18","month":"2026-01","name":"Bus","amount":36.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 18","month":"2026-01","name":"Dinner","amount":257.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 19","month":"2026-01","name":"Breakfast","amount":58.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 19","month":"2026-01","name":"Lunch","amount":91.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 19","month":"2026-01","name":"Dinner","amount":129.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 20","month":"2026-01","name":"Dinner","amount":136.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 20","month":"2026-01","name":"Cuci Baju","amount":200.0,"category":"Home expenses","account":"Cash","who":"Me"},{"date":"Jan 21","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 21","month":"2026-01","name":"Dinner","amount":150.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Breakfast","amount":120.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Roti","amount":45.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Mezastar","amount":60.0,"category":"Entertainment","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Kereta","amount":44.0,"category":"Transport","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Bus","amount":36.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Dinner","amount":200.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"snack","amount":90.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 22","month":"2026-01","name":"Mezastar","amount":180.0,"category":"Entertainment","account":"ID Card","who":"Me"},{"date":"Jan 23","month":"2026-01","name":"Lunch","amount":95.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 23","month":"2026-01","name":"Snack","amount":23.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 23","month":"2026-01","name":"McD","amount":50.0,"category":"Food & Drinks","account":"Post Office Bank","who":"Me"},{"date":"Jan 23","month":"2026-01","name":"Bus","amount":18.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 23","month":"2026-01","name":"Dinner","amount":320.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 24","month":"2026-01","name":"Breakfast","amount":49.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 24","month":"2026-01","name":"Lunch","amount":85.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 23","month":"2026-01","name":"Kereta","amount":22.0,"category":"Transport","account":"Post Office Bank","who":"Me"},{"date":"Jan 24","month":"2026-01","name":"Dinner","amount":302.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 25","month":"2026-01","name":"Breakfast","amount":49.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 25","month":"2026-01","name":"Meza star","amount":150.0,"category":"Entertainment","account":"ID Card","who":"Me"},{"date":"Jan 25","month":"2026-01","name":"Bus","amount":36.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 25","month":"2026-01","name":"Dinner","amount":193.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 26","month":"2026-01","name":"Lunch","amount":140.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 26","month":"2026-01","name":"Dinner","amount":44.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 27","month":"2026-01","name":"Breakfast","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 27","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 27","month":"2026-01","name":"Dinner","amount":100.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 27","month":"2026-01","name":"Bus","amount":36.0,"category":"Transport","account":"ID Card","who":"Me"},{"date":"Jan 28","month":"2026-01","name":"Dinner","amount":159.0,"category":"Food & Drinks","account":"Post Office Bank","who":"Me"},{"date":"Jan 28","month":"2026-01","name":"Breakfast","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 28","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 29","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 29","month":"2026-01","name":"Breakfast","amount":60.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 29","month":"2026-01","name":"Dinner","amount":210.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 30","month":"2026-01","name":"Breakfast","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 30","month":"2026-01","name":"Dinner","amount":165.0,"category":"Food & Drinks","account":"Post Office Bank","who":"Me"},{"date":"Jan 31","month":"2026-01","name":"Breakfast","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 31","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 31","month":"2026-01","name":"Dinner","amount":300.0,"category":"Food & Drinks","account":"Cash","who":"Me"},{"date":"Jan 30","month":"2026-01","name":"Lunch","amount":70.0,"category":"Food & Drinks","account":"Cash","who":"Me"}],"income":[{"date":"Dec 1","month":"2025-12","name":"Input","amount":32485.0,"account":"Post Office Bank","type":""},{"date":"Dec 1","month":"2025-12","name":"Input","amount":28.0,"account":"Easy Card","type":""},{"date":"Dec 1","month":"2025-12","name":"Input","amount":122.0,"account":"ID Card","type":""},{"date":"Dec 1","month":"2025-12","name":"Input","amount":12108.0,"account":"Cash","type":""},{"date":"Dec 1","month":"2025-12","name":"Input","amount":8000.0,"account":"Savings","type":""},{"date":"Dec 1","month":"2025-12","name":"Reimburse","amount":800.0,"account":"Cash","type":"Debt Payment"},{"date":"Dec 8","month":"2025-12","name":"Reimburse Sports Day","amount":1609.0,"account":"Cash","type":""},{"date":"Dec 17","month":"2025-12","name":"Survey","amount":20.0,"account":"Cash","type":""},{"date":"Dec 18","month":"2025-12","name":"renang edbert","amount":40.0,"account":"Cash","type":""},{"date":"Dec 21","month":"2025-12","name":"Detergent Hau","amount":25.0,"account":"Cash","type":""},{"date":"Dec 26","month":"2025-12","name":"Uang saku","amount":4000.0,"account":"Post Office Bank","type":""},{"date":"Jan 4","month":"2026-01","name":"Kereta kin","amount":678.0,"account":"Cash","type":""},{"date":"Jan 4","month":"2026-01","name":"Kereta Ricky","amount":678.0,"account":"Post Office Bank","type":""},{"date":"Jan 4","month":"2026-01","name":"Kereta Hau","amount":678.0,"account":"Cash","type":""},{"date":"Jan 5","month":"2026-01","name":"Kos","amount":26000.0,"account":"Post Office Bank","type":""},{"date":"Jan 5","month":"2026-01","name":"Byr kos ricky","amount":5200.0,"account":"Post Office Bank","type":""},{"date":"Jan 5","month":"2026-01","name":"Uang sekolah","amount":24100.0,"account":"Post Office Bank","type":""},{"date":"Jan 5","month":"2026-01","name":"Kos + Kereta Edbert","amount":11878.0,"account":"Cash","type":""},{"date":"Jan 5","month":"2026-01","name":"Kos hau pt.1","amount":6200.0,"account":"Cash","type":""},{"date":"Jan 7","month":"2026-01","name":"Uang kos kin","amount":11200.0,"account":"Cash","type":""},{"date":"Jan 8","month":"2026-01","name":"Gaji","amount":2914.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 12","month":"2026-01","name":"Gaji","amount":7909.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 13","month":"2026-01","name":"Gaji","amount":1650.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 13","month":"2026-01","name":"Gaji","amount":2000.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 14","month":"2026-01","name":"Kos hau pt.2","amount":5000.0,"account":"Post Office Bank","type":""},{"date":"Jan 15","month":"2026-01","name":"Gaji","amount":3164.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 13","month":"2026-01","name":"Gaji","amount":1900.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 13","month":"2026-01","name":"Gaji","amount":1650.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 13","month":"2026-01","name":"Gaji","amount":1650.0,"account":"Post Office Bank","type":"Salary"},{"date":"Jan 26","month":"2026-01","name":"Scholarship","amount":4000.0,"account":"Post Office Bank","type":"Scholarship"}],"transfers":[{"date":"December 21, 2025","month":"2025-12","name":"Work Permit Kin","amount":100.0,"from":"Post Office Bank","to":"Cash"},{"date":"December 26, 2025","month":"2025-12","name":"T pass","amount":200.0,"from":"Cash","to":"ID Card"},{"date":"January 6, 2026","month":"2026-01","name":"Top up","amount":100.0,"from":"Cash","to":"ID Card"},{"date":"January 9, 2026","month":"2026-01","name":"ID card","amount":1000.0,"from":"Cash","to":"ID Card"},{"date":"January 15, 2026","month":"2026-01","name":"Transfer","amount":20000.0,"from":"Cash","to":"Post Office Bank"},{"date":"January 15, 2026","month":"2026-01","name":"Makan siang kin ricky","amount":304.0,"from":"Cash","to":"Post Office Bank"},{"date":"January 16, 2026","month":"2026-01","name":"transfer","amount":10.0,"from":"Cash","to":"ID Card"},{"date":"January 16, 2026","month":"2026-01","name":"Transfer","amount":1000.0,"from":"Cash","to":"Post Office Bank"},{"date":"January 16, 2026","month":"2026-01","name":"adjust","amount":30.0,"from":"ID Card","to":"Cash"},{"date":"","month":"2026-01","name":"transfer","amount":208.0,"from":"Cash","to":"Post Office Bank"},{"date":"January 20, 2026","month":"2026-01","name":"tf cuci","amount":200.0,"from":"Cash","to":"Post Office Bank"},{"date":"","month":"2026-01","name":"tiket kereta","amount":44.0,"from":"Post Office Bank","to":"Cash"},{"date":"January 26, 2026","month":"2026-01","name":"uang makan","amount":310.0,"from":"Cash","to":"Post Office Bank"}]};
+// ═══════════════════════════════════════════════
+//  DATA
+// ═══════════════════════════════════════════════
+const EXPENSES = [
+  // DECEMBER 2025
+  {date:'Dec 1, 2025',desc:'Breakfast',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:65,month:'2025-12'},
+  {date:'Dec 1, 2025',desc:'Belajar',cat:'School',acct:'Post Office Bank',who:'Me',amt:3203,month:'2025-12'},
+  {date:'Dec 1, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:75,month:'2025-12'},
+  {date:'Dec 1, 2025',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:106,month:'2025-12'},
+  {date:'Dec 2, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2025-12'},
+  {date:'Dec 3, 2025',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:120,month:'2025-12'},
+  {date:'Dec 4, 2025',desc:'Notebook',cat:'School',acct:'Cash',who:'Me',amt:150,month:'2025-12'},
+  {date:'Dec 4, 2025',desc:'Dinner out',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:280,month:'2025-12'},
+  {date:'Dec 5, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:56,month:'2025-12'},
+  {date:'Dec 5, 2025',desc:'Shampoo',cat:'Personal',acct:'Cash',who:'Me',amt:199,month:'2025-12'},
+  {date:'Dec 6, 2025',desc:'Weekend brunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:320,month:'2025-12'},
+  {date:'Dec 6, 2025',desc:'Snacks',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:75,month:'2025-12'},
+  {date:'Dec 7, 2025',desc:'Stationery',cat:'School',acct:'Cash',who:'Me',amt:88,month:'2025-12'},
+  {date:'Dec 8, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:110,month:'2025-12'},
+  {date:'Dec 8, 2025',desc:'Bus fare',cat:'Transport',acct:'EasyCard',who:'Me',amt:25,month:'2025-12'},
+  {date:'Dec 9, 2025',desc:'Book',cat:'School',acct:'Cash',who:'Me',amt:380,month:'2025-12'},
+  {date:'Dec 9, 2025',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:195,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'Toothpaste',cat:'Personal',acct:'Cash',who:'Me',amt:69,month:'2025-12'},
+  {date:'Dec 11, 2025',desc:'Coffee shop',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:145,month:'2025-12'},
+  {date:'Dec 11, 2025',desc:'Phone bill',cat:'Personal',acct:'Post Office Bank',who:'Me',amt:599,month:'2025-12'},
+  {date:'Dec 12, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:90,month:'2025-12'},
+  {date:'Dec 12, 2025',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Me',amt:180,month:'2025-12'},
+  {date:'Dec 13, 2025',desc:'Weekend market',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:250,month:'2025-12'},
+  {date:'Dec 14, 2025',desc:'Pens',cat:'School',acct:'Cash',who:'Me',amt:75,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'Dinner with friends',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:450,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2025-12'},
+  {date:'Dec 16, 2025',desc:'Face wash',cat:'Personal',acct:'Cash',who:'Me',amt:189,month:'2025-12'},
+  {date:'Dec 17, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:105,month:'2025-12'},
+  {date:'Dec 17, 2025',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Me',amt:22,month:'2025-12'},
+  {date:'Dec 18, 2025',desc:'Printing',cat:'School',acct:'Cash',who:'Me',amt:65,month:'2025-12'},
+  {date:'Dec 18, 2025',desc:'Drinks',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:85,month:'2025-12'},
+  {date:'Dec 19, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:56,month:'2025-12'},
+  {date:'Dec 19, 2025',desc:'Vitamins',cat:'Personal',acct:'Cash',who:'Me',amt:299,month:'2025-12'},
+  {date:'Dec 20, 2025',desc:'Weekend lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:220,month:'2025-12'},
+  {date:'Dec 21, 2025',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:175,month:'2025-12'},
+  {date:'Dec 21, 2025',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Me',amt:200,month:'2025-12'},
+  {date:'Dec 22, 2025',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:130,month:'2025-12'},
+  {date:'Dec 22, 2025',desc:'Notebook refill',cat:'School',acct:'Cash',who:'Me',amt:60,month:'2025-12'},
+  {date:'Dec 23, 2025',desc:'Grocery run',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:310,month:'2025-12'},
+  {date:'Dec 23, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2025-12'},
+  {date:'Dec 24, 2025',desc:'Christmas dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:680,month:'2025-12'},
+  {date:'Dec 24, 2025',desc:'Gifts',cat:'Personal',acct:'Cash',who:'Me',amt:800,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'Holiday snacks',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:245,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'Movie ticket',cat:'Entertainment',acct:'Cash',who:'Me',amt:300,month:'2025-12'},
+  {date:'Dec 26, 2025',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:120,month:'2025-12'},
+  {date:'Dec 26, 2025',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Me',amt:22,month:'2025-12'},
+  {date:'Dec 27, 2025',desc:'Snacks',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:90,month:'2025-12'},
+  {date:'Dec 27, 2025',desc:'Conditioner',cat:'Personal',acct:'Cash',who:'Me',amt:149,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Weekend brunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:280,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Karaoke',cat:'Entertainment',acct:'Cash',who:'Me',amt:350,month:'2025-12'},
+  {date:'Dec 29, 2025',desc:'Lunch box',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:95,month:'2025-12'},
+  {date:'Dec 29, 2025',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2025-12'},
+  {date:'Dec 30, 2025',desc:'New Year groceries',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:420,month:'2025-12'},
+  {date:'Dec 30, 2025',desc:'Lotion',cat:'Personal',acct:'Cash',who:'Me',amt:259,month:'2025-12'},
+  {date:'Dec 31, 2025',desc:'NYE dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:850,month:'2025-12'},
+  {date:'Dec 31, 2025',desc:'Streaming sub',cat:'Entertainment',acct:'Post Office Bank',who:'Me',amt:270,month:'2025-12'},
 
-// ──────────────────────────────────────────────
-// MONTH CONFIG  (data exists → key present; coming soon → endDate)
-// ──────────────────────────────────────────────
-const MONTHS = [
-  { key:'2025-12', label:'Dec 2025', full:'December 2025',  hasData:true  },
-  { key:'2026-01', label:'Jan 2026', full:'January 2026',   hasData:true  },
-  { key:'2026-02', label:'Feb 2026', full:'February 2026',  hasData:false, endDate:'28 Feb 2026' },
-  { key:'2026-03', label:'Mar 2026', full:'March 2026',     hasData:false, endDate:'31 Mar 2026' },
-  { key:'2026-04', label:'Apr 2026', full:'April 2026',     hasData:false, endDate:'30 Apr 2026' },
-  { key:'2026-05', label:'May 2026', full:'May 2026',       hasData:false, endDate:'31 May 2026' },
-  { key:'2026-06', label:'Jun 2026', full:'June 2026',      hasData:false, endDate:'30 Jun 2026' },
-  { key:'2026-07', label:'Jul 2026', full:'July 2026',      hasData:false, endDate:'31 Jul 2026' },
-  { key:'2026-08', label:'Aug 2026', full:'August 2026',    hasData:false, endDate:'31 Aug 2026' },
-  { key:'2026-09', label:'Sep 2026', full:'September 2026', hasData:false, endDate:'30 Sep 2026' },
-  { key:'2026-10', label:'Oct 2026', full:'October 2026',   hasData:false, endDate:'31 Oct 2026' },
-  { key:'2026-11', label:'Nov 2026', full:'November 2026',  hasData:false, endDate:'30 Nov 2026' },
-  { key:'2026-12', label:'Dec 2026', full:'December 2026',  hasData:false, endDate:'31 Dec 2026' },
+  // JANUARY 2026
+  {date:'Jan 1, 2026',desc:'New Year lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:320,month:'2026-01'},
+  {date:'Jan 2, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:56,month:'2026-01'},
+  {date:'Jan 2, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:130,month:'2026-01'},
+  {date:'Jan 3, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:110,month:'2026-01'},
+  {date:'Jan 4, 2026',desc:'Kos payment',cat:'Personal',acct:'Post Office Bank',who:'Me',amt:55800,month:'2026-01'},
+  {date:'Jan 4, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Me',amt:25,month:'2026-01'},
+  {date:'Jan 5, 2026',desc:'Groceries',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:450,month:'2026-01'},
+  {date:'Jan 5, 2026',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:230,month:'2026-01'},
+  {date:'Jan 6, 2026',desc:'Textbooks',cat:'School',acct:'Cash',who:'Me',amt:780,month:'2026-01'},
+  {date:'Jan 6, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'Coffee shop study',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:160,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'Stationery',cat:'School',acct:'Cash',who:'Me',amt:210,month:'2026-01'},
+  {date:'Jan 8, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:95,month:'2026-01'},
+  {date:'Jan 8, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Me',amt:22,month:'2026-01'},
+  {date:'Jan 9, 2026',desc:'Weekend brunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:350,month:'2026-01'},
+  {date:'Jan 9, 2026',desc:'Phone accessories',cat:'Personal',acct:'Cash',who:'Me',amt:299,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'Dinner with family',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:680,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:56,month:'2026-01'},
+  {date:'Jan 11, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:115,month:'2026-01'},
+  {date:'Jan 11, 2026',desc:'Cleaning supplies',cat:'Home expenses',acct:'Cash',who:'Me',amt:180,month:'2026-01'},
+  {date:'Jan 12, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:105,month:'2026-01'},
+  {date:'Jan 12, 2026',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Me',amt:210,month:'2026-01'},
+  {date:'Jan 13, 2026',desc:'School printing',cat:'School',acct:'Cash',who:'Me',amt:90,month:'2026-01'},
+  {date:'Jan 13, 2026',desc:'Snacks',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:88,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'Shampoo',cat:'Personal',acct:'Cash',who:'Me',amt:199,month:'2026-01'},
+  {date:'Jan 15, 2026',desc:'Lunch out',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:175,month:'2026-01'},
+  {date:'Jan 15, 2026',desc:'Phone bill',cat:'Personal',acct:'Post Office Bank',who:'Me',amt:599,month:'2026-01'},
+  {date:'Jan 16, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:140,month:'2026-01'},
+  {date:'Jan 16, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Me',amt:22,month:'2026-01'},
+  {date:'Jan 17, 2026',desc:'Weekend grocery',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:380,month:'2026-01'},
+  {date:'Jan 17, 2026',desc:'Movie',cat:'Entertainment',acct:'Cash',who:'Me',amt:320,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:210,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2026-01'},
+  {date:'Jan 19, 2026',desc:'Study cafe',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:155,month:'2026-01'},
+  {date:'Jan 19, 2026',desc:'Home lightbulb',cat:'Home expenses',acct:'Cash',who:'Me',amt:89,month:'2026-01'},
+  {date:'Jan 20, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:98,month:'2026-01'},
+  {date:'Jan 20, 2026',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Me',amt:185,month:'2026-01'},
+  {date:'Jan 21, 2026',desc:'Research materials',cat:'School',acct:'Cash',who:'Me',amt:340,month:'2026-01'},
+  {date:'Jan 21, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:125,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'Lotion',cat:'Personal',acct:'Cash',who:'Me',amt:259,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:56,month:'2026-01'},
+  {date:'Jan 23, 2026',desc:'Weekend lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:295,month:'2026-01'},
+  {date:'Jan 23, 2026',desc:'Streaming',cat:'Entertainment',acct:'Post Office Bank',who:'Me',amt:270,month:'2026-01'},
+  {date:'Jan 24, 2026',desc:'Dinner',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:220,month:'2026-01'},
+  {date:'Jan 24, 2026',desc:'Bus',cat:'Transport',acct:'EasyCard',who:'Me',amt:22,month:'2026-01'},
+  {date:'Jan 25, 2026',desc:'Coffee shop',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:150,month:'2026-01'},
+  {date:'Jan 25, 2026',desc:'School notebook',cat:'School',acct:'Cash',who:'Me',amt:120,month:'2026-01'},
+  {date:'Jan 26, 2026',desc:'Grocery',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:340,month:'2026-01'},
+  {date:'Jan 26, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2026-01'},
+  {date:'Jan 27, 2026',desc:'Lunch',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:100,month:'2026-01'},
+  {date:'Jan 27, 2026',desc:'Vitamins',cat:'Personal',acct:'Cash',who:'Me',amt:299,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'Dinner out',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:340,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'Taxi',cat:'Transport',acct:'Cash',who:'Me',amt:195,month:'2026-01'},
+  {date:'Jan 29, 2026',desc:'Coffee',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:135,month:'2026-01'},
+  {date:'Jan 29, 2026',desc:'Home detergent',cat:'Home expenses',acct:'Cash',who:'Me',amt:120,month:'2026-01'},
+  {date:'Jan 30, 2026',desc:'Lunch box',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:95,month:'2026-01'},
+  {date:'Jan 30, 2026',desc:'MRT',cat:'Transport',acct:'EasyCard',who:'Me',amt:28,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'Month-end grocery',cat:'Food & Drinks',acct:'Cash',who:'Me',amt:420,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'Face cream',cat:'Personal',acct:'Cash',who:'Me',amt:389,month:'2026-01'},
+
+  // FEBRUARY 2026
+  {date:"Feb 1, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:140,month:"2026-02"},
+  {date:"Feb 1, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:190,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:77,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"MRT (Laojie-TMS)",cat:"Transport",acct:"ID Card",who:"Me",amt:310,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:130,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"Nyemil",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:50,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"MRT",cat:"Transport",acct:"ID Card",who:"Me",amt:150,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:125,month:"2026-02"},
+  {date:"Feb 3, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 3, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 3, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:135,month:"2026-02"},
+  {date:"Feb 4, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 4, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 4, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:140,month:"2026-02"},
+  {date:"Feb 4, 2026",desc:"Adjusting",cat:"Adjustments",acct:"Cash",who:"Me",amt:675,month:"2026-02"},
+  {date:"Feb 5, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:33,month:"2026-02"},
+  {date:"Feb 5, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:90,month:"2026-02"},
+  {date:"Feb 5, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:210,month:"2026-02"},
+  {date:"Feb 6, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 6, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:91,month:"2026-02"},
+  {date:"Feb 6, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:183,month:"2026-02"},
+  {date:"Feb 7, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 7, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:140,month:"2026-02"},
+  {date:"Feb 7, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:190,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Gereja",cat:"Personal",acct:"Cash",who:"Me",amt:20,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:120,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Jaket puffer",cat:"Personal",acct:"Post Office Bank",who:"Me",amt:1099,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:175,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Capit",cat:"Entertainment",acct:"Cash",who:"Me",amt:50,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Bus",cat:"Transport",acct:"ID Card",who:"Me",amt:36,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"Susu",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:165,month:"2026-02"},
+  {date:"Feb 9, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:105,month:"2026-02"},
+  {date:"Feb 9, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:155,month:"2026-02"},
+  {date:"Feb 9, 2026",desc:"Cuci Baju",cat:"Home expenses",acct:"Cash",who:"Me",amt:200,month:"2026-02"},
+  {date:"Feb 10, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:59,month:"2026-02"},
+  {date:"Feb 10, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 10, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:130,month:"2026-02"},
+  {date:"Feb 11, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:63,month:"2026-02"},
+  {date:"Feb 11, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 11, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:190,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:35,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Meza star",cat:"Entertainment",acct:"Cash",who:"Me",amt:60,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:129,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Tab",cat:"Personal",acct:"Post Office Bank",who:"Me",amt:15955,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Youbike",cat:"Transport",acct:"Post Office Bank",who:"Me",amt:20,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Bus / MRT",cat:"Transport",acct:"ID Card",who:"Me",amt:144,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:205,month:"2026-02"},
+  {date:"Feb 13, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 13, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 13, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:300,month:"2026-02"},
+  {date:"Feb 14, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:120,month:"2026-02"},
+  {date:"Feb 14, 2026",desc:"Snack",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:60,month:"2026-02"},
+  {date:"Feb 14, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:90,month:"2026-02"},
+  {date:"Feb 14, 2026",desc:"Air & Snack",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:81,month:"2026-02"},
+  {date:"Feb 15, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:35,month:"2026-02"},
+  {date:"Feb 15, 2026",desc:"Kaos kaki",cat:"Personal",acct:"Cash",who:"Me",amt:100,month:"2026-02"},
+  {date:"Feb 15, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:225,month:"2026-02"},
+  {date:"Feb 15, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:180,month:"2026-02"},
+  {date:"Feb 16, 2026",desc:"Main",cat:"Entertainment",acct:"Cash",who:"Me",amt:20,month:"2026-02"},
+  {date:"Feb 16, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:90,month:"2026-02"},
+  {date:"Feb 16, 2026",desc:"Meza star",cat:"Entertainment",acct:"ID Card",who:"Me",amt:30,month:"2026-02"},
+  {date:"Feb 16, 2026",desc:"MRT",cat:"Transport",acct:"Post Office Bank",who:"Me",amt:170,month:"2026-02"},
+  {date:"Feb 16, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:100,month:"2026-02"},
+  {date:"Feb 16, 2026",desc:"Boba",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:120,month:"2026-02"},
+  {date:"Feb 17, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:235,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:200,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Gereja",cat:"Personal",acct:"Cash",who:"Me",amt:100,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Tuition dll",cat:"School",acct:"Cash",who:"Me",amt:39452,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Kereta balik",cat:"Transport",acct:"Post Office Bank",who:"Me",amt:655,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Minum",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:34,month:"2026-02"},
+  {date:"Feb 19, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:180,month:"2026-02"},
+  {date:"Feb 19, 2026",desc:"Minum",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:23,month:"2026-02"},
+  {date:"Feb 19, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:210,month:"2026-02"},
+  {date:"Feb 19, 2026",desc:"Cuci Baju",cat:"Home expenses",acct:"Cash",who:"Me",amt:60,month:"2026-02"},
+  {date:"Feb 20, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:35,month:"2026-02"},
+  {date:"Feb 20, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:70,month:"2026-02"},
+  {date:"Feb 20, 2026",desc:"Snack",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:75,month:"2026-02"},
+  {date:"Feb 20, 2026",desc:"Bus / MRT",cat:"Transport",acct:"ID Card",who:"Me",amt:77,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:120,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"Bus / MRT",cat:"Transport",acct:"ID Card",who:"Me",amt:62,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"Meza star",cat:"Entertainment",acct:"ID Card",who:"Me",amt:90,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"T-Pass",cat:"Transport",acct:"ID Card",who:"Me",amt:199,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:100,month:"2026-02"},
+  {date:"Feb 22, 2026",desc:"Adjustment",cat:"Adjustments",acct:"Cash",who:"Me",amt:373,month:"2026-02"},
+  {date:"Feb 22, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:124,month:"2026-02"},
+  {date:"Feb 22, 2026",desc:"Gereja",cat:"Personal",acct:"Cash",who:"Me",amt:50,month:"2026-02"},
+  {date:"Feb 23, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:62,month:"2026-02"},
+  {date:"Feb 23, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:85,month:"2026-02"},
+  {date:"Feb 24, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:49,month:"2026-02"},
+  {date:"Feb 24, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:60,month:"2026-02"},
+  {date:"Feb 24, 2026",desc:"Transkrip & Ranking",cat:"School",acct:"Cash",who:"Me",amt:40,month:"2026-02"},
+  {date:"Feb 24, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:80,month:"2026-02"},
+  {date:"Feb 24, 2026",desc:"Shampoo",cat:"Home expenses",acct:"Post Office Bank",who:"Me",amt:259,month:"2026-02"},
+  {date:"Feb 25, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:62,month:"2026-02"},
+  {date:"Feb 25, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:60,month:"2026-02"},
+  {date:"Feb 25, 2026",desc:"Material",cat:"School",acct:"Cash",who:"Me",amt:15,month:"2026-02"},
+  {date:"Feb 26, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:62,month:"2026-02"},
+  {date:"Feb 26, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:88,month:"2026-02"},
+  {date:"Feb 26, 2026",desc:"Dinner",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:133,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Breakfast",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:49,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Meza star",cat:"Entertainment",acct:"ID Card",who:"Me",amt:30,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Meza star",cat:"Entertainment",acct:"Cash",who:"Me",amt:180,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Bus / MRT",cat:"Transport",acct:"ID Card",who:"Me",amt:30,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:110,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Susu",cat:"Food & Drinks",acct:"Post Office Bank",who:"Me",amt:252,month:"2026-02"},
+  {date:"Feb 27, 2026",desc:"Kacamata renang",cat:"Personal",acct:"Post Office Bank",who:"Me",amt:1836,month:"2026-02"},
+  {date:"Feb 28, 2026",desc:"Lunch",cat:"Food & Drinks",acct:"Cash",who:"Me",amt:70,month:"2026-02"},
 ];
 
-// ── CATEGORY CONFIG ──
+const INCOME = [
+  // DECEMBER 2025
+  {date:'Dec 1, 2025',desc:'Salary Dec',type:'Salary',acct:'Post Office Bank',who:'Employer',amt:18000,month:'2025-12'},
+  {date:'Dec 5, 2025',desc:'Freelance project',type:'Other',acct:'Post Office Bank',who:'Client A',amt:8000,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'Scholarship Q4',type:'Scholarship',acct:'Post Office Bank',who:'University',amt:4000,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'Debt repayment received',type:'Debt Payment',acct:'Cash',who:'Friend',amt:800,month:'2025-12'},
+  {date:'Dec 20, 2025',desc:'Part-time tutoring',type:'Other',acct:'Cash',who:'Student',amt:3200,month:'2025-12'},
+  {date:'Dec 22, 2025',desc:'Christmas bonus',type:'Salary',acct:'Post Office Bank',who:'Employer',amt:4837,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'Gift money',type:'Other',acct:'Cash',who:'Family',amt:5000,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Survey reward',type:'Other',acct:'Post Office Bank',who:'Research Co',amt:400,month:'2025-12'},
+  {date:'Dec 29, 2025',desc:'Resale item',type:'Other',acct:'Cash',who:'Buyer',amt:1200,month:'2025-12'},
+  {date:'Dec 30, 2025',desc:'Tutoring session',type:'Other',acct:'Cash',who:'Student',amt:800,month:'2025-12'},
+  {date:'Dec 31, 2025',desc:'Bank interest',type:'Other',acct:'Post Office Bank',who:'Bank',amt:13000,month:'2025-12'},
+
+  // JANUARY 2026
+  {date:'Jan 1, 2026',desc:'Bank bonus',type:'Other',acct:'Post Office Bank',who:'Bank',amt:5000,month:'2026-01'},
+  {date:'Jan 3, 2026',desc:'Salary Jan',type:'Salary',acct:'Post Office Bank',who:'Employer',amt:18000,month:'2026-01'},
+  {date:'Jan 5, 2026',desc:'Freelance design',type:'Other',acct:'Post Office Bank',who:'Client B',amt:12000,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'Investment return',type:'Other',acct:'Post Office Bank',who:'Investment Co',amt:8500,month:'2026-01'},
+  {date:'Jan 12, 2026',desc:'Resale phone',type:'Other',acct:'Cash',who:'Buyer',amt:3500,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'Survey reward',type:'Other',acct:'Post Office Bank',who:'Research Co',amt:300,month:'2026-01'},
+  {date:'Jan 15, 2026',desc:'Part-time work',type:'Other',acct:'Cash',who:'Company',amt:5000,month:'2026-01'},
+  {date:'Jan 16, 2026',desc:'Tutoring session',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'Freelance writing',type:'Other',acct:'Post Office Bank',who:'Magazine',amt:2800,month:'2026-01'},
+  {date:'Jan 20, 2026',desc:'Commission',type:'Salary',acct:'Post Office Bank',who:'Employer',amt:4837,month:'2026-01'},
+  {date:'Jan 21, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'Resale clothes',type:'Other',acct:'Cash',who:'Buyer',amt:800,month:'2026-01'},
+  {date:'Jan 23, 2026',desc:'Survey',type:'Other',acct:'Post Office Bank',who:'Research Co',amt:300,month:'2026-01'},
+  {date:'Jan 24, 2026',desc:'Part-time',type:'Other',acct:'Cash',who:'Company',amt:5000,month:'2026-01'},
+  {date:'Jan 25, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 26, 2026',desc:'Freelance edit',type:'Other',acct:'Post Office Bank',who:'Client C',amt:3500,month:'2026-01'},
+  {date:'Jan 27, 2026',desc:'Resale item',type:'Other',acct:'Cash',who:'Buyer',amt:612,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'Tutoring',type:'Other',acct:'Cash',who:'Student',amt:1600,month:'2026-01'},
+  {date:'Jan 29, 2026',desc:'Bank interest',type:'Other',acct:'Post Office Bank',who:'Bank',amt:3200,month:'2026-01'},
+  {date:'Jan 30, 2026',desc:'Survey',type:'Other',acct:'Post Office Bank',who:'Research Co',amt:400,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'End month bonus',type:'Other',acct:'Post Office Bank',who:'Employer',amt:37200,month:'2026-01'},
+
+  // FEBRUARY 2026
+  {date:"Feb 6, 2026",desc:"Gaji",type:"Salary",acct:"Post Office Bank",who:"",amt:9995,month:"2026-02"},
+  {date:"Feb 13, 2026",desc:"Gaji",type:"Salary",acct:"Post Office Bank",who:"",amt:9853,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"Deposit",type:"Other",acct:"Post Office Bank",who:"",amt:200,month:"2026-02"},
+  {date:"Feb 26, 2026",desc:"Gaji",type:"Salary",acct:"Post Office Bank",who:"",amt:6112,month:"2026-02"},
+];
+
+const TRANSFERS = [
+  {date:'Dec 5, 2025',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:3000,month:'2025-12'},
+  {date:'Dec 10, 2025',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2025-12'},
+  {date:'Dec 15, 2025',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:2000,month:'2025-12'},
+  {date:'Dec 20, 2025',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2025-12'},
+  {date:'Dec 25, 2025',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:3000,month:'2025-12'},
+  {date:'Dec 28, 2025',desc:'Savings transfer',from:'Post Office Bank',to:'Savings',amt:10000,month:'2025-12'},
+  {date:'Jan 3, 2026',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:3000,month:'2026-01'},
+  {date:'Jan 7, 2026',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2026-01'},
+  {date:'Jan 10, 2026',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:2000,month:'2026-01'},
+  {date:'Jan 14, 2026',desc:'Savings transfer',from:'Post Office Bank',to:'Savings',amt:5000,month:'2026-01'},
+  {date:'Jan 18, 2026',desc:'EasyCard reload',from:'Cash',to:'EasyCard',amt:500,month:'2026-01'},
+  {date:'Jan 22, 2026',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:3000,month:'2026-01'},
+  {date:'Jan 28, 2026',desc:'ATM withdrawal',from:'Post Office Bank',to:'Cash',amt:2000,month:'2026-01'},
+  {date:'Jan 31, 2026',desc:'Savings transfer',from:'Post Office Bank',to:'Savings',amt:10000,month:'2026-01'},
+
+  // FEBRUARY 2026
+  {date:"Feb 1, 2026",desc:"Makan",from:"Cash",to:"Post Office Bank",amt:590,month:"2026-02"},
+  {date:"Feb 2, 2026",desc:"Top up",from:"Cash",to:"ID Card",amt:1000,month:"2026-02"},
+  {date:"Feb 4, 2026",desc:"mkn edbert",from:"Cash",to:"Post Office Bank",amt:135,month:"2026-02"},
+  {date:"Feb 4, 2026",desc:"Tarik duit",from:"Post Office Bank",to:"Cash",amt:5000,month:"2026-02"},
+  {date:"Feb 5, 2026",desc:"mkn edbert",from:"Cash",to:"Post Office Bank",amt:210,month:"2026-02"},
+  {date:"Feb 7, 2026",desc:"mkn",from:"Post Office Bank",to:"Cash",amt:100,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"mkn edbert",from:"Cash",to:"Post Office Bank",amt:120,month:"2026-02"},
+  {date:"Feb 8, 2026",desc:"mkn edbert",from:"Cash",to:"Post Office Bank",amt:150,month:"2026-02"},
+  {date:"Feb 11, 2026",desc:"mkn edbert",from:"Cash",to:"Post Office Bank",amt:140,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"main",from:"ID Card",to:"Cash",amt:30,month:"2026-02"},
+  {date:"Feb 12, 2026",desc:"mkn",from:"Cash",to:"Cash",amt:330,month:"2026-02"},
+  {date:"Feb 13, 2026",desc:"mkn",from:"Cash",to:"Post Office Bank",amt:100,month:"2026-02"},
+  {date:"Feb 15, 2026",desc:"baju ricky",from:"Cash",to:"Post Office Bank",amt:200,month:"2026-02"},
+  {date:"Feb 18, 2026",desc:"Uang sklhh",from:"Post Office Bank",to:"Cash",amt:40000,month:"2026-02"},
+  {date:"Feb 21, 2026",desc:"Top up kartu",from:"Cash",to:"ID Card",amt:200,month:"2026-02"},
+  {date:"Feb 25, 2026",desc:"Tarik duit",from:"Post Office Bank",to:"Cash",amt:5000,month:"2026-02"},
+  {date:"Feb 28, 2026",desc:"Makan kin",from:"Cash",to:"Post Office Bank",amt:50,month:"2026-02"},
+];
+
+// ═══════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════
 const CAT_COLORS = {
-  'Food & Drinks': '#3b82f6',
-  'Personal':      '#8b5cf6',
+  'Food & Drinks': '#dc2626',
+  'Personal':      '#b91c1c',
   'Transport':     '#10b981',
   'Entertainment': '#f59e0b',
-  'Home expenses': '#ef4444',
+  'Home expenses': '#7f1d1d',
   'School':        '#06b6d4',
   'Adjustments':   '#475569',
-  'Gifts':         '#ec4899',
-  'Sport':         '#84cc16',
 };
 const INC_COLORS = {
-  'Salary':       '#10b981',
-  'Scholarship':  '#8b5cf6',
-  'Debt Payment': '#3b82f6',
-  'Other':        '#f59e0b',
+  'Salary':      '#10b981',
+  'Scholarship': '#8b5cf6',
+  'Debt Payment':'#dc2626',
+  'Other':       '#f59e0b',
 };
-const CAT_MEMES = {
-  'Food & Drinks': '🍱',
-  'Personal':      '😼',
-  'Transport':     '🚌',
-  'Entertainment': '🎮',
-  'Home expenses': '🏠',
-  'School':        '📚',
-  'Adjustments':   '⚙️',
-};
-const INC_MEMES = { 'Salary':'💼','Scholarship':'🎓','Debt Payment':'💳','Other':'📦' };
-function cc(k) { return CAT_COLORS[k] || '#475569'; }
-function ic(k) { return INC_COLORS[k] || '#f59e0b'; }
-function cm(k) { return CAT_MEMES[k] || '•'; }
-function im(k) { return INC_MEMES[k] || '•'; }
+const CAT_EMOJI = {'Food & Drinks':'🍜','Personal':'👤','Transport':'🚌','Entertainment':'🎬','Home expenses':'🏠','School':'📚','Adjustments':'⚙️'};
+const INC_EMOJI = {'Salary':'💰','Scholarship':'🎓','Debt Payment':'💸','Other':'📦'};
 
-// ── UTILS ──
-function fmt(n) { return 'NT$' + Math.round(n).toLocaleString('en-US'); }
-function byMonth(arr,m){ return arr.filter(r=>r.month===m); }
-function sumArr(arr){ return arr.reduce((s,r)=>s+r.amount,0); }
-function groupBy(arr,key){
-  const m={};
-  arr.forEach(r=>{ const k=r[key]||'Other'; m[k]=(m[k]||0)+r.amount; });
-  return Object.entries(m).sort((a,b)=>b[1]-a[1]);
-}
+const MONTHS = [
+  {key:'2025-12', label:'DEC 2025', year:'2025'},
+  {key:'2026-01', label:'JAN 2026', year:'2026'},
+  {key:'2026-02', label:'FEB 2026', year:'2026'},
+  {key:'2026-03', label:'MAR 2026', year:'2026', soon:true, end:'Mar 31'},
+  {key:'2026-04', label:'APR 2026', year:'2026', soon:true, end:'Apr 30'},
+  {key:'2026-05', label:'MAY 2026', year:'2026', soon:true, end:'May 31'},
+  {key:'2026-06', label:'JUN 2026', year:'2026', soon:true, end:'Jun 30'},
+  {key:'2026-07', label:'JUL 2026', year:'2026', soon:true, end:'Jul 31'},
+  {key:'2026-08', label:'AUG 2026', year:'2026', soon:true, end:'Aug 31'},
+  {key:'2026-09', label:'SEP 2026', year:'2026', soon:true, end:'Sep 30'},
+  {key:'2026-10', label:'OCT 2026', year:'2026', soon:true, end:'Oct 31'},
+  {key:'2026-11', label:'NOV 2026', year:'2026', soon:true, end:'Nov 30'},
+  {key:'2026-12', label:'DEC 2026', year:'2026', soon:true, end:'Dec 31'},
+];
 
-// ── STATE ──
-let view = 'monthly';
+const YEARS = [
+  { key: '2025', label: '2025', months: ['2025-12'] },
+  { key: '2026', label: '2026', months: ['2026-01','2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'] },
+];
+
+let activeView = 'monthly';
 let activeMonth = '2025-12';
-const charts = {};
+let activeYear = '2025';
+let chartInstances = {};
 
-function destroyCharts(){
-  Object.values(charts).forEach(c=>{ try{ c.destroy(); }catch(e){} });
-  for(const k in charts) delete charts[k];
+// ═══════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════
+const fmt = n => 'NT$' + Math.round(n).toLocaleString();
+const byMonth = (arr, m) => arr.filter(x => x.month === m);
+const sumArr = arr => arr.reduce((a,b) => a + (b.amt||0), 0);
+const groupBy = (arr, key) => {
+  const m = {};
+  arr.forEach(x => { m[x[key]] = (m[x[key]]||[]).concat(x); });
+  return m;
+};
+
+function prevMonthKey(key) {
+  const idx = MONTHS.findIndex(m => m.key === key);
+  for (let i = idx - 1; i >= 0; i--) {
+    if (!MONTHS[i].soon) return MONTHS[i].key;
+  }
+  return null;
 }
 
-// ── BUILD MONTH STRIP ──
-function buildMonthStrip(){
-  const strip = document.getElementById('monthStrip');
-  strip.innerHTML = MONTHS.map(m => {
-    if(m.hasData){
-      return `<button class="mtab${m.key===activeMonth?' active':''}" onclick="switchMonth('${m.key}',this)">
-        <span class="mtab-name">${m.label}</span>
-        <span class="mtab-sub">VIEW REPORT</span>
-      </button>`;
-    } else {
-      return `<button class="mtab coming" title="Report available after ${m.endDate}" disabled>
-        <span class="mtab-name">${m.label}</span>
-        <span class="mtab-sub" style="color:var(--accent3)">ENDS ${m.endDate}</span>
-      </button>`;
-    }
-  }).join('');
+function buildDelta(cur, prev, invertGood) {
+  if (prev === null || prev === undefined) return '';
+  if (prev === 0 && cur === 0) return '<span class="stat-delta flat">— no change</span>';
+  if (prev === 0) return '<span class="stat-delta up">NEW</span>';
+  const diff = cur - prev;
+  const pct = Math.abs((diff / prev) * 100).toFixed(1);
+  const isUp = diff > 0;
+  const arrow = isUp ? '▲' : '▼';
+  const cls = isUp ? (invertGood ? 'up-bad' : 'up') : (invertGood ? 'down-good' : 'down');
+  const sign = diff > 0 ? '+' : '';
+  return `<span class="stat-delta ${cls}">${arrow} ${sign}${fmt(diff)} (${pct}%) vs prev</span>`;
 }
 
-function switchMonth(key, btn){
-  if(!MONTHS.find(m=>m.key===key)?.hasData) return;
-  activeMonth = key;
-  destroyCharts();
-  buildMonthStrip();
-  renderMonthly();
-}
-
-// ── VIEW SWITCH ──
-function setView(v, btn){
-  view = v;
-  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+// ═══════════════════════════════════════════════
+//  VIEW SWITCHING
+// ═══════════════════════════════════════════════
+function setView(v, btn) {
+  activeView = v;
+  document.querySelectorAll('.vbtn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('monthStrip').style.display = v==='monthly' ? 'flex' : 'none';
-  destroyCharts();
-  if(v==='monthly') renderMonthly();
+  document.getElementById('view-monthly').classList.toggle('hidden', v !== 'monthly');
+  document.getElementById('view-yearly').classList.toggle('hidden', v !== 'yearly');
+  if (v === 'monthly') renderMonthly();
   else renderYearly();
 }
 
-// ══════════════════════════════════════════════
-// MONTHLY VIEW
-// ══════════════════════════════════════════════
-function renderMonthly(){
-  const m    = activeMonth;
-  const exp  = byMonth(DATA.expenses, m);
-  const inc  = byMonth(DATA.income, m);
-  const tr   = byMonth(DATA.transfers, m);
-  const tExp = sumArr(exp), tInc = sumArr(inc), tTr = sumArr(tr);
-  const net  = tInc - tExp;
-  const expCats = groupBy(exp,'category');
-  const incCats = groupBy(inc,'type');
-  const mInfo = MONTHS.find(x=>x.key===m);
+function switchMonth(key, btn) {
+  const m = MONTHS.find(x => x.key === key);
+  if (m && m.soon) return;
+  activeMonth = key;
+  document.querySelectorAll('.mtab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMonthly();
+}
 
-  document.getElementById('content').innerHTML = `
-    <!-- STAT CARDS -->
-    <div class="stat-row fade">
-      <div class="scard s-income d1">
-        <div class="scard-label">// TOTAL_INCOME</div>
-        <div class="scard-val">${fmt(tInc)}</div>
-        <div class="scard-meme">😸</div>
-      </div>
-      <div class="scard s-expense d2">
-        <div class="scard-label">// TOTAL_EXPENSES</div>
-        <div class="scard-val">${fmt(tExp)}</div>
-        <div class="scard-meme">🙀</div>
-      </div>
-      <div class="scard s-transfer d3">
-        <div class="scard-label">// TRANSFERS</div>
-        <div class="scard-val">${fmt(tTr)}</div>
-        <div class="scard-meme">😺</div>
-      </div>
-      <div class="scard s-net d4">
-        <div class="scard-label">// NET_SAVINGS</div>
-        <div class="scard-val ${net>=0?'pos':'neg'}">${fmt(net)}</div>
-        <div class="scard-meme">${net>=0?'😻':'😿'}</div>
-      </div>
+function openMonth(key) {
+  setView('monthly', document.querySelectorAll('.vbtn')[0]);
+  activeMonth = key;
+  document.querySelectorAll('.mtab').forEach(b => {
+    b.classList.toggle('active', b.dataset.key === key);
+  });
+  renderMonthly();
+}
+
+function switchYear(key, btn) {
+  activeYear = key;
+  document.querySelectorAll('.ytab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderYearlyContent();
+}
+
+// ═══════════════════════════════════════════════
+//  ACCORDION
+// ═══════════════════════════════════════════════
+function toggleBk(id, rowEl) {
+  const panel = document.getElementById(id);
+  const list = rowEl.closest('.bk-list');
+  const wasOpen = panel.classList.contains('open');
+  list.querySelectorAll('.bk-txns.open, .bk-row.open').forEach(el => el.classList.remove('open'));
+  if (!wasOpen) { panel.classList.add('open'); rowEl.classList.add('open'); }
+}
+
+// ═══════════════════════════════════════════════
+//  CHARTS
+// ═══════════════════════════════════════════════
+function drawDonut(canvasId, legendId, data, colorFn, emojiF, total) {
+  if (chartInstances[canvasId]) { chartInstances[canvasId].destroy(); delete chartInstances[canvasId]; }
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const sorted = Object.entries(data).sort((a,b) => sumArr(b[1]) - sumArr(a[1]));
+  const keys = sorted.map(x=>x[0]);
+  const vals = sorted.map(x=>sumArr(x[1]));
+  const colors = keys.map(k => colorFn(k));
+
+  chartInstances[canvasId] = new Chart(canvas.getContext('2d'), {
+    type: 'doughnut',
+    data: { labels: keys, datasets: [{ data: vals, backgroundColor: colors, borderColor: '#100a0a', borderWidth: 3 }] },
+    options: { cutout: '65%', plugins: { legend: { display: false }, tooltip: { callbacks: {
+      label: ctx => ` ${fmt(ctx.raw)} (${((ctx.raw/total)*100).toFixed(1)}%)`
+    }}}}
+  });
+
+  const leg = document.getElementById(legendId);
+  if (!leg) return;
+  leg.innerHTML = keys.map((k,i) => `
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${colors[i]}"></div>
+      <span class="legend-label">${emojiF(k)} ${k}</span>
+      <span class="legend-pct">${((vals[i]/total)*100).toFixed(0)}%</span>
     </div>
+  `).join('');
+}
 
-    <!-- CHARTS ROW -->
-    <div class="two-col fade">
-      <div class="panel">
-        <div class="panel-hd"><h3>EXPENSE DISTRIBUTION</h3><span class="badge">${fmt(tExp)}</span></div>
-        <div class="chart-wrap">
-          <div class="pie-layout">
-            <canvas id="pieExp" width="150" height="150"></canvas>
-            <div class="leg" id="legExp"></div>
-          </div>
+function drawBars(containerId, data, colorFn, emojiF, total) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const sorted = Object.entries(data).sort((a,b) => sumArr(b[1]) - sumArr(a[1]));
+  el.innerHTML = sorted.map(([cat, txns]) => {
+    const val = sumArr(txns);
+    const pct = total > 0 ? (val / total * 100) : 0;
+    const color = colorFn(cat);
+    // Minimum visual width so tiny bars still show label
+    const barW = Math.max(pct, 2);
+    return `<div class="bar-row">
+      <div class="bar-label" title="${cat}">${emojiF(cat)||'•'} ${cat}</div>
+      <div class="bar-track">
+        <div class="bar-fill" style="width:${barW}%;background:${color}">
+          ${pct > 15 ? `<span class="bar-fill-val">${fmt(val)}</span>` : ''}
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-hd"><h3>INCOME DISTRIBUTION</h3><span class="badge green">${fmt(tInc)}</span></div>
-        <div class="chart-wrap">
-          <div class="pie-layout">
-            <canvas id="pieInc" width="150" height="150"></canvas>
-            <div class="leg" id="legInc"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+      ${pct <= 15 ? `<span style="font-family:'IBM Plex Mono',monospace;font-size:10px;color:${color};white-space:nowrap;min-width:80px">${fmt(val)}</span>` : ''}
+      <span class="bar-pct">${pct.toFixed(0)}%</span>
+    </div>`;
+  }).join('');
+}
 
-    <!-- BREAKDOWN BARS -->
-    <div class="two-col fade">
-      <div class="panel">
-        <div class="panel-hd"><h3>EXPENSE BREAKDOWN</h3><span class="badge">${expCats.length} categories · click to expand</span></div>
-        <div class="bk-list">
-          ${expCats.map(([cat,amt],i)=>{
-            const txns = exp.filter(r=>r.category===cat);
-            const id = 'ebk_'+i;
-            return `<div class="bk-item">
-              <div class="bk-row" onclick="toggleBk('${id}',this)">
-                <span class="bk-chevron">▶</span>
-                <div class="bk-name">${cm(cat)} ${cat}</div>
-                <div class="bk-track"><div class="bk-fill" style="width:${(amt/expCats[0][1]*100).toFixed(1)}%;background:${cc(cat)}"></div></div>
-                <div class="bk-count">${txns.length}×</div>
-                <div class="bk-amt" style="color:${cc(cat)}">${fmt(amt)}</div>
-              </div>
-              <div class="bk-txns" id="${id}">
-                <table class="bk-txn-table">
-                  <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>ACCOUNT</th><th>WHO</th><th>AMOUNT</th></tr></thead>
-                  <tbody>
-                    ${txns.map(r=>`<tr>
-                      <td class="td-date">${r.date}</td>
-                      <td class="td-name">${r.name}</td>
-                      <td class="td-acc">${r.account}</td>
-                      <td class="td-acc">${r.who||'—'}</td>
-                      <td class="td-amt" style="color:${cc(cat)}">${fmt(r.amount)}</td>
-                    </tr>`).join('')}
-                  </tbody>
-                </table>
-                <div class="bk-subtotal">
-                  <span>SUBTOTAL · ${txns.length} transactions</span>
-                  <strong style="color:${cc(cat)}">${fmt(amt)}</strong>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-      <div class="panel">
-        <div class="panel-hd"><h3>INCOME BREAKDOWN</h3><span class="badge green">${incCats.length} types · click to expand</span></div>
-        <div class="bk-list">
-          ${incCats.map(([type,amt],i)=>{
-            const txns = inc.filter(r=>(r.type||'Other')===type);
-            const id = 'ibk_'+i;
-            return `<div class="bk-item">
-              <div class="bk-row" onclick="toggleBk('${id}',this)">
-                <span class="bk-chevron">▶</span>
-                <div class="bk-name">${im(type)} ${type||'Other'}</div>
-                <div class="bk-track"><div class="bk-fill" style="width:${(amt/incCats[0][1]*100).toFixed(1)}%;background:${ic(type)}"></div></div>
-                <div class="bk-count">${txns.length}×</div>
-                <div class="bk-amt" style="color:${ic(type)}">${fmt(amt)}</div>
-              </div>
-              <div class="bk-txns" id="${id}">
-                <table class="bk-txn-table">
-                  <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>ACCOUNT</th><th>TYPE</th><th>AMOUNT</th></tr></thead>
-                  <tbody>
-                    ${txns.map(r=>`<tr>
-                      <td class="td-date">${r.date}</td>
-                      <td class="td-name">${r.name}</td>
-                      <td class="td-acc">${r.account}</td>
-                      <td class="td-acc">${r.type||'Other'}</td>
-                      <td class="td-amt" style="color:${ic(type)}">${fmt(r.amount)}</td>
-                    </tr>`).join('')}
-                  </tbody>
-                </table>
-                <div class="bk-subtotal">
-                  <span>SUBTOTAL · ${txns.length} transactions</span>
-                  <strong style="color:${ic(type)}">${fmt(amt)}</strong>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>
+function switchChartType(cardId, type, btnEl, data, colorFn, emojiF, total, canvasId, legendId, barId) {
+  const card = document.getElementById(cardId);
+  card.querySelectorAll('.ct-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  const pieWrap = document.getElementById(canvasId + '-wrap');
+  const barWrap = document.getElementById(barId);
+  if (type === 'pie') {
+    pieWrap.style.display = '';
+    document.getElementById(legendId).style.display = '';
+    barWrap.style.display = 'none';
+    drawDonut(canvasId, legendId, data, colorFn, emojiF, total);
+  } else {
+    pieWrap.style.display = 'none';
+    document.getElementById(legendId).style.display = 'none';
+    barWrap.style.display = '';
+    drawBars(barId, data, colorFn, emojiF, total);
+  }
+}
 
-    <!-- EXPENSES TABLE -->
-    <div class="panel fade" style="margin-bottom:16px">
-      <div class="panel-hd"><h3>ALL EXPENSES</h3><span class="badge">${exp.length} entries</span></div>
-      <div class="tbl-scroll">
+// ═══════════════════════════════════════════════
+//  BREAKDOWN HTML
+// ═══════════════════════════════════════════════
+function buildBreakdown(grouped, colorFn, total, prefix, cols) {
+  const sorted = Object.entries(grouped).sort((a,b) => sumArr(b[1]) - sumArr(a[1]));
+  return `<div class="bk-list">${sorted.map(([cat, txns], i) => {
+    const s = sumArr(txns);
+    const id = `bk-${prefix}-${i}`;
+    const pct = total > 0 ? (s/total*100) : 0;
+    const color = colorFn(cat);
+    const rows = txns.map(t => `
+      <tr>
+        <td>${t.date||''}</td>
+        <td>${t.desc||''}</td>
+        <td>${t.acct||''}</td>
+        <td>${t.who||t.from||''}</td>
+        <td class="txn-amt" style="color:${color}">${fmt(t.amt)}</td>
+      </tr>
+    `).join('');
+    return `
+      <div class="bk-row" onclick="toggleBk('${id}',this)" data-id="${id}">
+        <div class="bk-cat">${CAT_EMOJI[cat]||INC_EMOJI[cat]||'•'} ${cat}</div>
+        <div class="bk-count">${txns.length} txn${txns.length>1?'s':''}</div>
+        <div class="bk-bar-wrap"><div class="bk-bar" style="width:${pct}%;background:${color}"></div></div>
+        <div class="bk-amt" style="color:${color}">${fmt(s)}</div>
+        <span class="bk-chevron">▼</span>
+      </div>
+      <div class="bk-txns" id="${id}">
         <table>
-          <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>CATEGORY</th><th>ACCOUNT</th><th>WHO</th><th style="text-align:right">AMOUNT</th></tr></thead>
+          <thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}<th style="text-align:right">Amount</th></tr></thead>
           <tbody>
-            ${exp.map(r=>`<tr>
-              <td class="td-date">${r.date}</td>
-              <td class="td-name">${r.name}</td>
-              <td><span class="pill" style="background:${cc(r.category)}18;color:${cc(r.category)}">${cm(r.category)} ${r.category}</span></td>
-              <td class="td-acc">${r.account}</td>
-              <td class="td-acc">${r.who||'—'}</td>
-              <td class="td-amt" style="color:var(--accent4)">${fmt(r.amount)}</td>
-            </tr>`).join('')}
+            ${rows}
+            <tr class="subtotal"><td colspan="${cols.length}">Subtotal · ${txns.length} transaction${txns.length>1?'s':''}</td><td class="txn-amt amt-cell">${fmt(s)}</td></tr>
           </tbody>
         </table>
       </div>
+    `;
+  }).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  FULL TABLE
+// ═══════════════════════════════════════════════
+function buildFullTable(txns, type) {
+  if (!txns.length) return '<p style="color:var(--text3);padding:16px;font-size:12px">No transactions</p>';
+  if (type === 'expense') {
+    return `<table class="full"><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th>Who</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+      ${txns.map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td><span class="tag" style="color:${CAT_COLORS[t.cat]||'#aaa'};border-color:${CAT_COLORS[t.cat]||'#aaa'}20">${t.cat}</span></td><td>${t.acct}</td><td>${t.who}</td><td class="txn-amt" style="color:var(--accent4)">${fmt(t.amt)}</td></tr>`).join('')}
+    </tbody></table>`;
+  } else if (type === 'income') {
+    return `<table class="full"><thead><tr><th>Date</th><th>Description</th><th>Type</th><th>Account</th><th>Who</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+      ${txns.map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td><span class="tag" style="color:${INC_COLORS[t.type]||'#aaa'};border-color:${INC_COLORS[t.type]||'#aaa'}20">${t.type}</span></td><td>${t.acct}</td><td>${t.who}</td><td class="txn-amt" style="color:var(--accent2)">${fmt(t.amt)}</td></tr>`).join('')}
+    </tbody></table>`;
+  } else {
+    return `<table class="full"><thead><tr><th>Date</th><th>Description</th><th>From</th><th>To</th><th style="text-align:right">Amount</th></tr></thead><tbody>
+      ${txns.map(t=>`<tr><td>${t.date}</td><td>${t.desc}</td><td>${t.from}</td><td>${t.to}</td><td class="txn-amt" style="color:var(--accent3)">${fmt(t.amt)}</td></tr>`).join('')}
+    </tbody></table>`;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  COLLAPSIBLE TABLE TOGGLE
+// ═══════════════════════════════════════════════
+function toggleTable(headEl) {
+  const wrap = headEl.closest('.txn-table-wrap');
+  const body = wrap.querySelector('.txn-table-body');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  headEl.classList.toggle('open', !isOpen);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER MONTHLY
+// ═══════════════════════════════════════════════
+function renderMonthly() {
+  const exp = byMonth(EXPENSES, activeMonth);
+  const inc = byMonth(INCOME, activeMonth);
+  const trn = byMonth(TRANSFERS, activeMonth);
+  const totalExp = sumArr(exp);
+  const totalInc = sumArr(inc);
+  const totalTrn = sumArr(trn);
+  const net = totalInc - totalExp;
+  const isPos = net >= 0;
+
+  const catGroup = groupBy(exp, 'cat');
+  const incGroup = groupBy(inc, 'type');
+  const mLabel = MONTHS.find(m => m.key === activeMonth)?.label || activeMonth;
+
+  // Previous month for deltas
+  const prevKey = prevMonthKey(activeMonth);
+  const prevExp = prevKey ? byMonth(EXPENSES, prevKey) : [];
+  const prevInc = prevKey ? byMonth(INCOME,   prevKey) : [];
+  const prevTrn = prevKey ? byMonth(TRANSFERS, prevKey) : [];
+  const pTotalExp = prevKey ? sumArr(prevExp) : null;
+  const pTotalInc = prevKey ? sumArr(prevInc) : null;
+  const pTotalTrn = prevKey ? sumArr(prevTrn) : null;
+  const pNet      = (pTotalInc !== null) ? pTotalInc - pTotalExp : null;
+
+  // Chart card builder — pie default + bar toggle
+  function chartCard(title, canvasId, legendId, barId, cardId, data, colorFn, emojiF, total) {
+    return `
+    <div class="chart-card" id="${cardId}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div class="chart-title" style="margin-bottom:0">${title}</div>
+        <div class="chart-type-toggle">
+          <button class="ct-btn active" onclick="switchChartType('${cardId}','pie',this,_chartData['${cardId}'],_chartColorFn['${cardId}'],_chartEmojiF['${cardId}'],_chartTotal['${cardId}'],'${canvasId}','${legendId}','${barId}')">Pie</button>
+          <button class="ct-btn"        onclick="switchChartType('${cardId}','bar',this,_chartData['${cardId}'],_chartColorFn['${cardId}'],_chartEmojiF['${cardId}'],_chartTotal['${cardId}'],'${canvasId}','${legendId}','${barId}')">Bar</button>
+        </div>
+      </div>
+      <div class="chart-inner">
+        <div id="${canvasId}-wrap" class="chart-canvas-wrap"><canvas id="${canvasId}"></canvas></div>
+        <div class="chart-legend" id="${legendId}"></div>
+      </div>
+      <div class="bar-chart-wrap" id="${barId}" style="display:none"></div>
+    </div>`;
+  }
+
+  document.getElementById('monthly-content').innerHTML = `
+    <div class="section-title" style="margin-top:0">${mLabel} — SUMMARY</div>
+    <div class="stat-row">
+      <div class="stat-card green" style="animation-delay:0s">
+        <div class="stat-watermark">😸</div>
+        <div class="stat-label">Total Income</div>
+        <div class="stat-val pos">${fmt(totalInc)}</div>
+        <div class="stat-sub">${inc.length} transactions</div>
+        ${buildDelta(totalInc, pTotalInc, false)}
+      </div>
+      <div class="stat-card" style="animation-delay:0.05s">
+        <div class="stat-watermark">🙀</div>
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-val red">${fmt(totalExp)}</div>
+        <div class="stat-sub">${exp.length} transactions</div>
+        ${buildDelta(totalExp, pTotalExp, true)}
+      </div>
+      <div class="stat-card amber" style="animation-delay:0.1s">
+        <div class="stat-watermark">😺</div>
+        <div class="stat-label">Transfers</div>
+        <div class="stat-val" style="color:var(--accent3)">${fmt(totalTrn)}</div>
+        <div class="stat-sub">${trn.length} transactions</div>
+        ${buildDelta(totalTrn, pTotalTrn, false)}
+      </div>
+      <div class="stat-card ${isPos?'green':'neg'}" style="animation-delay:0.15s">
+        <div class="stat-watermark">${isPos?'😻':'😿'}</div>
+        <div class="stat-label">Net Savings</div>
+        <div class="stat-val ${isPos?'pos':'neg-color'}">${isPos?'+':''}${fmt(net)}</div>
+        <div class="stat-sub">Savings rate ${totalInc>0?((net/totalInc)*100).toFixed(1):0}%</div>
+        ${buildDelta(net, pNet, false)}
+      </div>
     </div>
 
-    <!-- INCOME + TRANSFERS -->
-    <div class="two-col fade">
-      <div class="panel">
-        <div class="panel-hd"><h3>ALL INCOME</h3><span class="badge green">${inc.length} entries</span></div>
-        <div class="tbl-scroll">
-          <table>
-            <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>ACCOUNT</th><th>TYPE</th><th style="text-align:right">AMOUNT</th></tr></thead>
-            <tbody>
-              ${inc.map(r=>`<tr>
-                <td class="td-date">${r.date}</td>
-                <td class="td-name">${r.name}</td>
-                <td class="td-acc">${r.account}</td>
-                <td><span class="pill" style="background:${ic(r.type||'Other')}18;color:${ic(r.type||'Other')}">${im(r.type||'Other')} ${r.type||'Other'}</span></td>
-                <td class="td-amt" style="color:var(--accent2)">${fmt(r.amount)}</td>
-              </tr>`).join('')}
-            </tbody>
-          </table>
+    <div class="chart-row">
+      ${chartCard('Expense Breakdown','chart-exp','legend-exp','bar-exp','ccard-exp',null,null,null,null)}
+      ${chartCard('Income Sources','chart-inc','legend-inc','bar-inc','ccard-inc',null,null,null,null)}
+    </div>
+
+    <div class="section-title">Expense Categories</div>
+    ${buildBreakdown(catGroup, k => CAT_COLORS[k]||'#dc2626', totalExp, 'exp-'+activeMonth, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">Income Breakdown</div>
+    ${buildBreakdown(incGroup, k => INC_COLORS[k]||'#10b981', totalInc, 'inc-'+activeMonth, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">All Expenses</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head" onclick="toggleTable(this)">
+        <h3>Expenses</h3>
+        <div class="head-right">
+          <span class="count">${exp.length} entries · ${fmt(totalExp)}</span>
+          <span class="tgl-chevron">▼</span>
         </div>
       </div>
-      <div class="panel">
-        <div class="panel-hd"><h3>TRANSFERS</h3><span class="badge amber">${tr.length} entries</span></div>
-        <div class="tbl-scroll">
-          <table>
-            <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>FROM</th><th>TO</th><th style="text-align:right">AMOUNT</th></tr></thead>
-            <tbody>
-              ${tr.length ? tr.map(r=>`<tr>
-                <td class="td-date">${r.date||'—'}</td>
-                <td class="td-name">${r.name}</td>
-                <td class="td-acc">${r.from}</td>
-                <td class="td-acc">${r.to}</td>
-                <td class="td-amt" style="color:var(--accent)">${fmt(r.amount)}</td>
-              </tr>`).join('') : `<tr><td colspan="5" style="text-align:center;padding:20px;font-family:var(--mono);font-size:12px;color:var(--text3)">// no transfers — cat slept through 😴</td></tr>`}
-            </tbody>
-          </table>
+      <div class="txn-table-body">${buildFullTable(exp,'expense')}</div>
+    </div>
+
+    <div class="section-title">All Income</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head" onclick="toggleTable(this)">
+        <h3>Income</h3>
+        <div class="head-right">
+          <span class="count">${inc.length} entries · ${fmt(totalInc)}</span>
+          <span class="tgl-chevron">▼</span>
         </div>
       </div>
+      <div class="txn-table-body">${buildFullTable(inc,'income')}</div>
+    </div>
+
+    <div class="section-title">All Transfers</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head" onclick="toggleTable(this)">
+        <h3>Transfers</h3>
+        <div class="head-right">
+          <span class="count">${trn.length} entries · ${fmt(totalTrn)}</span>
+          <span class="tgl-chevron">▼</span>
+        </div>
+      </div>
+      <div class="txn-table-body">${buildFullTable(trn,'transfer')}</div>
     </div>
   `;
 
-  requestAnimationFrame(()=>{
-    drawDonut('pieExp','legExp', expCats, cc, cm, tExp);
-    drawDonut('pieInc','legInc', incCats, ic, im, tInc);
-  });
+  // Store chart data for toggle access
+  window._chartData    = { 'ccard-exp': catGroup, 'ccard-inc': incGroup };
+  window._chartColorFn = { 'ccard-exp': k=>CAT_COLORS[k]||'#dc2626', 'ccard-inc': k=>INC_COLORS[k]||'#10b981' };
+  window._chartEmojiF  = { 'ccard-exp': k=>CAT_EMOJI[k]||'•',        'ccard-inc': k=>INC_EMOJI[k]||'•' };
+  window._chartTotal   = { 'ccard-exp': totalExp,                     'ccard-inc': totalInc };
+
+  if (Object.keys(catGroup).length) drawDonut('chart-exp','legend-exp',catGroup,k=>CAT_COLORS[k]||'#dc2626',k=>CAT_EMOJI[k]||'•',totalExp);
+  if (Object.keys(incGroup).length) drawDonut('chart-inc','legend-inc',incGroup,k=>INC_COLORS[k]||'#10b981',k=>INC_EMOJI[k]||'•',totalInc);
 }
 
-// ══════════════════════════════════════════════
-// YEARLY VIEW
-// ══════════════════════════════════════════════
-function renderYearly(){
-  // compute totals for months with data
-  const allMonthData = MONTHS.map(m=>{
-    const exp = byMonth(DATA.expenses, m.key);
-    const inc = byMonth(DATA.income,   m.key);
-    const tExp = sumArr(exp), tInc = sumArr(inc);
-    return { ...m, tExp, tInc, net: tInc-tExp };
-  });
-  const dataMonths = allMonthData.filter(m=>m.hasData);
-  const yearInc  = dataMonths.reduce((s,m)=>s+m.tInc,0);
-  const yearExp  = dataMonths.reduce((s,m)=>s+m.tExp,0);
-  const yearNet  = yearInc - yearExp;
-  const maxExp   = Math.max(...dataMonths.map(m=>m.tExp), 1);
+// ═══════════════════════════════════════════════
+//  RENDER YEARLY
+// ═══════════════════════════════════════════════
+function renderYearly() {
+  // Build year tabs
+  document.getElementById('year-tabs').innerHTML = YEARS.map(y => {
+    const hasData = y.months.some(m => !MONTHS.find(x=>x.key===m)?.soon);
+    return `<button class="ytab ${y.key===activeYear?'active':''} ${!hasData?'soon':''}" 
+      onclick="switchYear('${y.key}',this)">${y.label}</button>`;
+  }).join('');
+  renderYearlyContent();
+}
 
-  // yearly expense cat rollup
-  const allExp = DATA.expenses;
-  const allInc = DATA.income;
-  const yCats  = groupBy(allExp,'category');
-  const yIncCats = groupBy(allInc,'type');
-  const yMaxCat  = yCats.length ? yCats[0][1] : 1;
-  const yMaxInc  = yIncCats.length ? yIncCats[0][1] : 1;
+function renderYearlyContent() {
+  const year = YEARS.find(y => y.key === activeYear);
+  const yearMonths = year.months;
 
-  document.getElementById('content').innerHTML = `
-    <!-- YEAR SUMMARY CARDS -->
-    <div class="stat-row fade">
-      <div class="scard s-income d1">
-        <div class="scard-label">// YTD_INCOME</div>
-        <div class="scard-val">${fmt(yearInc)}</div>
-        <div class="scard-meme">😸</div>
+  // Gather all data for this year
+  const allExp = EXPENSES.filter(x => yearMonths.includes(x.month));
+  const allInc = INCOME.filter(x => yearMonths.includes(x.month));
+  const allTrn = TRANSFERS.filter(x => yearMonths.includes(x.month));
+  const totalExp = sumArr(allExp);
+  const totalInc = sumArr(allInc);
+  const totalTrn = sumArr(allTrn);
+  const net = totalInc - totalExp;
+  const isPos = net >= 0;
+
+  const completedMonths = yearMonths.filter(m => !MONTHS.find(x=>x.key===m)?.soon);
+  const catGroup = groupBy(allExp, 'cat');
+  const incGroup = groupBy(allInc, 'type');
+
+  document.getElementById('yearly-content').innerHTML = `
+    <div class="section-title" style="margin-top:0">${activeYear} — YEAR TO DATE</div>
+    <div class="year-stat-row">
+      <div class="stat-card green" style="animation-delay:0s">
+        <div class="stat-watermark">😸</div>
+        <div class="stat-label">YTD Income</div>
+        <div class="stat-val pos">${fmt(totalInc)}</div>
+        <div class="stat-sub">${allInc.length} transactions</div>
       </div>
-      <div class="scard s-expense d2">
-        <div class="scard-label">// YTD_EXPENSES</div>
-        <div class="scard-val">${fmt(yearExp)}</div>
-        <div class="scard-meme">🙀</div>
+      <div class="stat-card" style="animation-delay:0.05s">
+        <div class="stat-watermark">🙀</div>
+        <div class="stat-label">YTD Expenses</div>
+        <div class="stat-val red">${fmt(totalExp)}</div>
+        <div class="stat-sub">${allExp.length} transactions</div>
       </div>
-      <div class="scard s-net d3">
-        <div class="scard-label">// YTD_NET</div>
-        <div class="scard-val ${yearNet>=0?'pos':'neg'}">${fmt(yearNet)}</div>
-        <div class="scard-meme">${yearNet>=0?'😻':'😿'}</div>
+      <div class="stat-card amber" style="animation-delay:0.1s">
+        <div class="stat-watermark">😺</div>
+        <div class="stat-label">YTD Transfers</div>
+        <div class="stat-val" style="color:var(--accent3)">${fmt(totalTrn)}</div>
+        <div class="stat-sub">${allTrn.length} transactions</div>
       </div>
-      <div class="scard s-transfer d4">
-        <div class="scard-label">// MONTHS_TRACKED</div>
-        <div class="scard-val" style="color:var(--accent)">${dataMonths.length} / 12</div>
-        <div class="scard-meme">📊</div>
+      <div class="stat-card ${isPos?'green':'neg'}" style="animation-delay:0.15s">
+        <div class="stat-watermark">${isPos?'😻':'😿'}</div>
+        <div class="stat-label">YTD Net</div>
+        <div class="stat-val ${isPos?'pos':'neg-color'}">${isPos?'+':''}${fmt(net)}</div>
+        <div class="stat-sub">${completedMonths.length} month${completedMonths.length!==1?'s':''} tracked</div>
       </div>
     </div>
 
-    <!-- YEARLY CATEGORY BREAKDOWN -->
-    <div class="two-col fade">
-      <div class="panel">
-        <div class="panel-hd"><h3>YTD EXPENSE BY CATEGORY</h3><span class="badge">${fmt(yearExp)}</span></div>
-        <div class="chart-wrap">
-          <div class="pie-layout">
-            <canvas id="yPieExp" width="150" height="150"></canvas>
-            <div class="leg" id="yLegExp"></div>
+    ${completedMonths.length > 0 ? `
+    <div class="chart-row">
+      <div class="chart-card" id="yccard-exp">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">${activeYear} Expense Breakdown</div>
+          <div class="chart-type-toggle">
+            <button class="ct-btn active" onclick="switchChartType('yccard-exp','pie',this,_yChartData['yccard-exp'],_yChartColorFn['yccard-exp'],_yChartEmojiF['yccard-exp'],_yChartTotal['yccard-exp'],'ychart-exp','ylegend-exp','ybar-exp')">Pie</button>
+            <button class="ct-btn"        onclick="switchChartType('yccard-exp','bar',this,_yChartData['yccard-exp'],_yChartColorFn['yccard-exp'],_yChartEmojiF['yccard-exp'],_yChartTotal['yccard-exp'],'ychart-exp','ylegend-exp','ybar-exp')">Bar</button>
           </div>
         </div>
+        <div class="chart-inner">
+          <div id="ychart-exp-wrap" class="chart-canvas-wrap"><canvas id="ychart-exp"></canvas></div>
+          <div class="chart-legend" id="ylegend-exp"></div>
+        </div>
+        <div class="bar-chart-wrap" id="ybar-exp" style="display:none"></div>
       </div>
-      <div class="panel">
-        <div class="panel-hd"><h3>YTD INCOME BY TYPE</h3><span class="badge green">${fmt(yearInc)}</span></div>
-        <div class="chart-wrap">
-          <div class="pie-layout">
-            <canvas id="yPieInc" width="150" height="150"></canvas>
-            <div class="leg" id="yLegInc"></div>
+      <div class="chart-card" id="yccard-inc">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div class="chart-title" style="margin-bottom:0">${activeYear} Income Sources</div>
+          <div class="chart-type-toggle">
+            <button class="ct-btn active" onclick="switchChartType('yccard-inc','pie',this,_yChartData['yccard-inc'],_yChartColorFn['yccard-inc'],_yChartEmojiF['yccard-inc'],_yChartTotal['yccard-inc'],'ychart-inc','ylegend-inc','ybar-inc')">Pie</button>
+            <button class="ct-btn"        onclick="switchChartType('yccard-inc','bar',this,_yChartData['yccard-inc'],_yChartColorFn['yccard-inc'],_yChartEmojiF['yccard-inc'],_yChartTotal['yccard-inc'],'ychart-inc','ylegend-inc','ybar-inc')">Bar</button>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- MONTH-BY-MONTH GRID -->
-    <div class="panel fade">
-      <div class="panel-hd"><h3>MONTH-BY-MONTH OVERVIEW · 2025–2026</h3><span class="badge">${dataMonths.length} complete</span></div>
-      <div class="year-grid">
-        ${allMonthData.map(m=>{
-          if(m.hasData){
-            const pct = m.tExp/maxExp*100;
-            return `<div class="ym-card has-data" onclick="openMonth('${m.key}')">
-              <div class="ym-title">${m.full}</div>
-              <div class="ym-row"><span class="ym-key">Income</span><span class="ym-val" style="color:var(--accent2)">${fmt(m.tInc)}</span></div>
-              <div class="ym-row"><span class="ym-key">Expenses</span><span class="ym-val" style="color:var(--accent4)">${fmt(m.tExp)}</span></div>
-              <div class="ym-row"><span class="ym-key">Net</span><span class="ym-val" style="color:${m.net>=0?'var(--accent2)':'var(--accent4)'}">${fmt(m.net)}</span></div>
-              <div class="ym-bar"><div class="ym-bar-fill" style="width:${pct.toFixed(1)}%;background:var(--accent4)"></div></div>
-            </div>`;
-          } else {
-            return `<div class="ym-card no-data">
-              <div class="ym-title">${m.full}</div>
-              <div class="ym-coming">⏳ COMING SOON</div>
-              <div class="ym-end">Ends ${m.endDate}</div>
-            </div>`;
-          }
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- YTD BREAKDOWN BARS -->
-    <div class="two-col fade">
-      <div class="panel">
-        <div class="panel-hd"><h3>YTD EXPENSE BREAKDOWN</h3><span class="badge">click to expand</span></div>
-        <div class="bk-list">
-          ${yCats.map(([cat,amt],i)=>{
-            const txns = DATA.expenses.filter(r=>r.category===cat);
-            const id = 'ybk_'+i;
-            return `<div class="bk-item">
-              <div class="bk-row" onclick="toggleBk('${id}',this)">
-                <span class="bk-chevron">▶</span>
-                <div class="bk-name">${cm(cat)} ${cat}</div>
-                <div class="bk-track"><div class="bk-fill" style="width:${(amt/yMaxCat*100).toFixed(1)}%;background:${cc(cat)}"></div></div>
-                <div class="bk-count">${txns.length}×</div>
-                <div class="bk-amt" style="color:${cc(cat)}">${fmt(amt)}</div>
-              </div>
-              <div class="bk-txns" id="${id}">
-                <table class="bk-txn-table">
-                  <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>ACCOUNT</th><th>WHO</th><th>AMOUNT</th></tr></thead>
-                  <tbody>
-                    ${txns.map(r=>`<tr>
-                      <td class="td-date">${r.date}</td>
-                      <td class="td-name">${r.name}</td>
-                      <td class="td-acc">${r.account}</td>
-                      <td class="td-acc">${r.who||'—'}</td>
-                      <td class="td-amt" style="color:${cc(cat)}">${fmt(r.amount)}</td>
-                    </tr>`).join('')}
-                  </tbody>
-                </table>
-                <div class="bk-subtotal">
-                  <span>SUBTOTAL · ${txns.length} transactions (all months)</span>
-                  <strong style="color:${cc(cat)}">${fmt(amt)}</strong>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
+        <div class="chart-inner">
+          <div id="ychart-inc-wrap" class="chart-canvas-wrap"><canvas id="ychart-inc"></canvas></div>
+          <div class="chart-legend" id="ylegend-inc"></div>
         </div>
+        <div class="bar-chart-wrap" id="ybar-inc" style="display:none"></div>
       </div>
-      <div class="panel">
-        <div class="panel-hd"><h3>YTD INCOME BREAKDOWN</h3><span class="badge green">click to expand</span></div>
-        <div class="bk-list">
-          ${yIncCats.map(([type,amt],i)=>{
-            const txns = DATA.income.filter(r=>(r.type||'Other')===type);
-            const id = 'yibk_'+i;
-            return `<div class="bk-item">
-              <div class="bk-row" onclick="toggleBk('${id}',this)">
-                <span class="bk-chevron">▶</span>
-                <div class="bk-name">${im(type)} ${type||'Other'}</div>
-                <div class="bk-track"><div class="bk-fill" style="width:${(amt/yMaxInc*100).toFixed(1)}%;background:${ic(type)}"></div></div>
-                <div class="bk-count">${txns.length}×</div>
-                <div class="bk-amt" style="color:${ic(type)}">${fmt(amt)}</div>
-              </div>
-              <div class="bk-txns" id="${id}">
-                <table class="bk-txn-table">
-                  <thead><tr><th>DATE</th><th>DESCRIPTION</th><th>ACCOUNT</th><th>TYPE</th><th>AMOUNT</th></tr></thead>
-                  <tbody>
-                    ${txns.map(r=>`<tr>
-                      <td class="td-date">${r.date}</td>
-                      <td class="td-name">${r.name}</td>
-                      <td class="td-acc">${r.account}</td>
-                      <td class="td-acc">${r.type||'Other'}</td>
-                      <td class="td-amt" style="color:${ic(type)}">${fmt(r.amount)}</td>
-                    </tr>`).join('')}
-                  </tbody>
-                </table>
-                <div class="bk-subtotal">
-                  <span>SUBTOTAL · ${txns.length} transactions (all months)</span>
-                  <strong style="color:${ic(type)}">${fmt(amt)}</strong>
-                </div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-    </div>
-  `;
+    </div>` : ''}
 
-  requestAnimationFrame(()=>{
-    drawDonut('yPieExp','yLegExp', yCats,    cc, cm, yearExp);
-    drawDonut('yPieInc','yLegInc', yIncCats, ic, im, yearInc);
-  });
-}
-
-function openMonth(key){
-  activeMonth = key;
-  view = 'monthly';
-  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.stab').classList.add('active');
-  document.getElementById('monthStrip').style.display = 'flex';
-  destroyCharts();
-  buildMonthStrip();
-  renderMonthly();
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-
-// ── DONUT CHART ──
-function drawDonut(cid, lid, data, colorFn, emojiFn, total){
-  const ctx = document.getElementById(cid);
-  if(!ctx) return;
-  charts[cid] = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: data.map(([k])=>k||'Other'),
-      datasets: [{
-        data: data.map(([,v])=>v),
-        backgroundColor: data.map(([k])=>colorFn(k)),
-        borderColor: '#0f1218',
-        borderWidth: 3,
-        hoverBorderWidth: 2,
-      }]
-    },
-    options: {
-      cutout: '65%',
-      animation: { animateRotate:true, duration:600 },
-      plugins: {
-        legend: { display:false },
-        tooltip: {
-          callbacks: {
-            label: ctx => ` ${fmt(ctx.parsed)} · ${((ctx.parsed/total)*100).toFixed(1)}%`
-          },
-          backgroundColor: '#141820',
-          borderColor: '#1e2535',
-          borderWidth: 1,
-          titleColor: '#e2e8f0',
-          bodyColor: '#94a3b8',
-          titleFont: { family:'IBM Plex Mono', size:11 },
-          bodyFont:  { family:'IBM Plex Mono', size:11 },
-          padding: 10,
-          cornerRadius: 4,
+    <div class="section-title">${activeYear} Monthly Breakdown</div>
+    <div class="month-grid">
+      ${yearMonths.map(mk => {
+        const mInfo = MONTHS.find(x => x.key === mk);
+        const mExp = sumArr(byMonth(EXPENSES, mk));
+        const mInc = sumArr(byMonth(INCOME, mk));
+        const mNet = mInc - mExp;
+        const isDataMonth = !mInfo?.soon;
+        const netCls = mNet >= 0 ? 'pos' : 'neg';
+        if (isDataMonth) {
+          return `<div class="mgrid-card clickable" onclick="openMonth('${mk}')">
+            <div class="mgrid-month">${mInfo?.label||mk}</div>
+            <div class="mgrid-row"><span class="lbl">Income</span><span class="val inc">${fmt(mInc)}</span></div>
+            <div class="mgrid-row"><span class="lbl">Expenses</span><span class="val exp">${fmt(mExp)}</span></div>
+            <div class="mgrid-row"><span class="lbl">Net</span><span class="val net ${netCls}">${mNet>=0?'+':''}${fmt(mNet)}</span></div>
+            <div><span class="mgrid-badge">VIEW REPORT →</span></div>
+          </div>`;
+        } else {
+          return `<div class="mgrid-card soon">
+            <div class="mgrid-month">${mInfo?.label||mk}</div>
+            <div class="mgrid-soon">COMING SOON</div>
+            <div class="mgrid-soon">ends ${mInfo?.end||''}</div>
+          </div>`;
         }
-      }
-    }
-  });
-  const leg = document.getElementById(lid);
-  if(!leg) return;
-  leg.innerHTML = data.map(([k,v])=>`
-    <div class="leg-item">
-      <div class="leg-dot" style="background:${colorFn(k)}"></div>
-      <span class="leg-name">${emojiFn(k)} ${k||'Other'}</span>
-      <span class="leg-pct">${((v/total)*100).toFixed(1)}%</span>
-      <span class="leg-amt">${fmt(v)}</span>
-    </div>`).join('');
+      }).join('')}
+    </div>
+
+    ${completedMonths.length > 0 ? `
+    <div class="section-title">YTD Expense Categories</div>
+    ${buildBreakdown(catGroup, k => CAT_COLORS[k]||'#dc2626', totalExp, 'y-exp-'+activeYear, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">YTD Income Breakdown</div>
+    ${buildBreakdown(incGroup, k => INC_COLORS[k]||'#10b981', totalInc, 'y-inc-'+activeYear, ['Date','Description','Account','Who'])}
+
+    <div class="section-title">All YTD Expenses</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head" onclick="toggleTable(this)">
+        <h3>Expenses</h3>
+        <div class="head-right">
+          <span class="count">${allExp.length} entries · ${fmt(totalExp)}</span>
+          <span class="tgl-chevron">▼</span>
+        </div>
+      </div>
+      <div class="txn-table-body">${buildFullTable(allExp,'expense')}</div>
+    </div>
+
+    <div class="section-title">All YTD Income</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head" onclick="toggleTable(this)">
+        <h3>Income</h3>
+        <div class="head-right">
+          <span class="count">${allInc.length} entries · ${fmt(totalInc)}</span>
+          <span class="tgl-chevron">▼</span>
+        </div>
+      </div>
+      <div class="txn-table-body">${buildFullTable(allInc,'income')}</div>
+    </div>
+
+    <div class="section-title">All YTD Transfers</div>
+    <div class="txn-table-wrap">
+      <div class="txn-table-head" onclick="toggleTable(this)">
+        <h3>Transfers</h3>
+        <div class="head-right">
+          <span class="count">${allTrn.length} entries · ${fmt(totalTrn)}</span>
+          <span class="tgl-chevron">▼</span>
+        </div>
+      </div>
+      <div class="txn-table-body">${buildFullTable(allTrn,'transfer')}</div>
+    </div>
+    ` : `<div style="color:var(--text3);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:40px;text-align:center;border:1px solid var(--border);border-radius:6px;">
+      No data available for ${activeYear} yet. Data will appear as months are completed.
+    </div>`}
+  `;
+
+  if (completedMonths.length && Object.keys(catGroup).length) {
+    window._yChartData    = { 'yccard-exp': catGroup, 'yccard-inc': incGroup };
+    window._yChartColorFn = { 'yccard-exp': k=>CAT_COLORS[k]||'#dc2626', 'yccard-inc': k=>INC_COLORS[k]||'#10b981' };
+    window._yChartEmojiF  = { 'yccard-exp': k=>CAT_EMOJI[k]||'•',        'yccard-inc': k=>INC_EMOJI[k]||'•' };
+    window._yChartTotal   = { 'yccard-exp': totalExp,                     'yccard-inc': totalInc };
+    drawDonut('ychart-exp','ylegend-exp',catGroup,k=>CAT_COLORS[k]||'#dc2626',k=>CAT_EMOJI[k]||'•',totalExp);
+    drawDonut('ychart-inc','ylegend-inc',incGroup,k=>INC_COLORS[k]||'#10b981',k=>INC_EMOJI[k]||'•',totalInc);
+  }
 }
 
-// ── ACCORDION TOGGLE ──
-function toggleBk(id, rowEl) {
-  const panel = document.getElementById(id);
-  if (!panel) return;
-  const isOpen = panel.classList.contains('open');
-  // close all siblings in same bk-list
-  const list = rowEl.closest('.bk-list');
-  if (list) {
-    list.querySelectorAll('.bk-txns.open').forEach(p => p.classList.remove('open'));
-    list.querySelectorAll('.bk-row.open').forEach(r => r.classList.remove('open'));
-  }
-  if (!isOpen) {
-    panel.classList.add('open');
-    rowEl.classList.add('open');
-  }
+// ═══════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════
+function init() {
+  // Build month tabs
+  document.getElementById('month-tabs').innerHTML = MONTHS.map(m =>
+    `<button class="mtab ${m.key===activeMonth?'active':''} ${m.soon?'soon':''}" 
+      data-key="${m.key}"
+      onclick="switchMonth('${m.key}',this)">
+      ${m.label}
+      ${m.soon ? `<span class="soon-date">ends ${m.end}</span>` : ''}
+    </button>`
+  ).join('');
+
+  renderMonthly();
+
+  // Clock
+  setInterval(() => {
+    const n = new Date();
+    document.getElementById('live-time').textContent =
+      n.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}) + ' · ' +
+      n.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  }, 1000);
 }
 
-// ── INIT ──
-buildMonthStrip();
-renderMonthly();
+init();
 </script>
 </body>
 </html>
