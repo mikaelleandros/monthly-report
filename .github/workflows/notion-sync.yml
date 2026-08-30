@@ -1,0 +1,200 @@
+name: Sync Notion Finance Data
+
+on:
+  schedule:
+    - cron: '0 0 * * *'   # runs every day at midnight UTC
+  workflow_dispatch:        # lets you also trigger it manually from GitHub
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch data from Notion
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: |
+          python3 << 'PYEOF'
+          import urllib.request, json, os, re
+
+          TOKEN = os.environ['NOTION_TOKEN']
+          HEADERS = {
+            'Authorization': f'Bearer {TOKEN}',
+            'Notion-Version': '2022-06-01',
+            'Content-Type': 'application/json',
+          }
+
+          DB_IDS = {
+            'expenses':  '2b3ede3adf42816788fafba1ef7e0dad',
+            'income':    '2b3ede3adf428163ab8cfed5e8bfacca',
+            'transfers': '2b3ede3adf4281af94b3d1a787778682',
+          }
+
+          MONTH_MAP = {
+            'December':'2025-12','January':'2026-01','February':'2026-02',
+            'March':'2026-03','April':'2026-04','May':'2026-05','June':'2026-06',
+            'July':'2026-07','August':'2026-08','September':'2026-09',
+            'October':'2026-10','November':'2026-11',
+          }
+          YEAR_OF = {mk: mk.split('-')[0] for mk in MONTH_MAP.values()}
+
+          def detect_month(date_str):
+              if not date_str: return None
+              # Notion date format: "2026-08-30"
+              try:
+                  parts = date_str.split('-')
+                  y, m = parts[0], int(parts[1])
+                  month_names = ['January','February','March','April','May','June',
+                                 'July','August','September','October','November','December']
+                  name = month_names[m-1]
+                  key = f"{y}-{str(m).zfill(2)}"
+                  return key, name[:3] + ' ' + str(int(parts[2])) + ', ' + y
+              except:
+                  return None
+
+          def clean(s):
+              if not s: return ''
+              return re.sub(r'\s*\(.*', '', s).strip()
+
+          def get_prop_text(prop):
+              if not prop: return ''
+              t = prop.get('type','')
+              if t == 'title':
+                  return ''.join(r.get('plain_text','') for r in prop.get('title',[]))
+              if t == 'rich_text':
+                  return ''.join(r.get('plain_text','') for r in prop.get('rich_text',[]))
+              if t == 'number':
+                  v = prop.get('number')
+                  return str(v) if v is not None else '0'
+              if t == 'date':
+                  d = prop.get('date')
+                  return d.get('start','') if d else ''
+              if t == 'select':
+                  s = prop.get('select')
+                  return s.get('name','') if s else ''
+              if t == 'relation':
+                  return ''
+              if t == 'people':
+                  people = prop.get('people',[])
+                  return people[0].get('name','') if people else ''
+              return ''
+
+          def fetch_all_pages(db_id):
+              url = f'https://api.notion.com/v1/databases/{db_id}/query'
+              results = []
+              body = json.dumps({'page_size': 100}).encode()
+              cursor = None
+              while True:
+                  payload = {'page_size': 100}
+                  if cursor: payload['start_cursor'] = cursor
+                  req = urllib.request.Request(url, data=json.dumps(payload).encode(), headers=HEADERS, method='POST')
+                  with urllib.request.urlopen(req) as res:
+                      data = json.loads(res.read())
+                  results.extend(data.get('results', []))
+                  if not data.get('has_more'): break
+                  cursor = data.get('next_cursor')
+              return results
+
+          MONTH_ORDER = [
+              '2025-12','2026-01','2026-02','2026-03','2026-04','2026-05',
+              '2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12'
+          ]
+
+          def sort_key(x):
+              mk = x.get('month','')
+              return MONTH_ORDER.index(mk) if mk in MONTH_ORDER else 99
+
+          # ── EXPENSES ──────────────────────────────────────────────
+          print("Fetching expenses...")
+          exp_pages = fetch_all_pages(DB_IDS['expenses'])
+          expenses = []
+          for p in exp_pages:
+              props = p.get('properties', {})
+              date_raw = get_prop_text(props.get('Date', {}))
+              result = detect_month(date_raw)
+              if not result: continue
+              mk, date_fmt = result
+              amt_raw = get_prop_text(props.get('Amount', {}))
+              try: amt = float(amt_raw)
+              except: amt = 0.0
+              expenses.append({
+                  'date':  date_fmt,
+                  'desc':  get_prop_text(props.get('Expense', {})),
+                  'cat':   clean(get_prop_text(props.get('Category', {}))),
+                  'acct':  clean(get_prop_text(props.get('Accounts', {}))),
+                  'who':   get_prop_text(props.get('Who?', {})) or 'Me',
+                  'amt':   amt,
+                  'month': mk,
+              })
+          expenses.sort(key=sort_key)
+          print(f"  Got {len(expenses)} expenses")
+
+          # ── INCOME ────────────────────────────────────────────────
+          print("Fetching income...")
+          inc_pages = fetch_all_pages(DB_IDS['income'])
+          income = []
+          for p in inc_pages:
+              props = p.get('properties', {})
+              date_raw = get_prop_text(props.get('Date', {}))
+              result = detect_month(date_raw)
+              if not result: continue
+              mk, date_fmt = result
+              amt_raw = get_prop_text(props.get('Amount', {}))
+              try: amt = float(amt_raw)
+              except: amt = 0.0
+              itype = clean(get_prop_text(props.get('Type', {}))) or 'Other'
+              if itype in ('Others', 'Duit Indo'): itype = 'Other'
+              desc = get_prop_text(props.get('Descripcion', {})) or itype
+              income.append({
+                  'date':  date_fmt,
+                  'desc':  desc,
+                  'type':  itype,
+                  'acct':  clean(get_prop_text(props.get('Account', {}))),
+                  'who':   '',
+                  'amt':   amt,
+                  'month': mk,
+              })
+          income.sort(key=sort_key)
+          print(f"  Got {len(income)} income entries")
+
+          # ── TRANSFERS ─────────────────────────────────────────────
+          print("Fetching transfers...")
+          trn_pages = fetch_all_pages(DB_IDS['transfers'])
+          transfers = []
+          for p in trn_pages:
+              props = p.get('properties', {})
+              date_raw = get_prop_text(props.get('Date', {}))
+              result = detect_month(date_raw)
+              if not result: continue
+              mk, date_fmt = result
+              amt_raw = get_prop_text(props.get('Amount', {}))
+              try: amt = float(amt_raw)
+              except: amt = 0.0
+              transfers.append({
+                  'date':  date_fmt,
+                  'desc':  get_prop_text(props.get('Description', {})),
+                  'from':  clean(get_prop_text(props.get('Transfer Out', {}))),
+                  'to':    clean(get_prop_text(props.get('Transfer In', {}))),
+                  'amt':   amt,
+                  'month': mk,
+              })
+          transfers.sort(key=sort_key)
+          print(f"  Got {len(transfers)} transfers")
+
+          # ── SAVE ──────────────────────────────────────────────────
+          output = {'expenses': expenses, 'income': income, 'transfers': transfers}
+          with open('data.json', 'w', encoding='utf-8') as f:
+              json.dump(output, f, ensure_ascii=False, indent=2)
+          print("Saved data.json successfully!")
+          PYEOF
+
+      - name: Commit and push data.json
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Auto-sync Notion data $(date +'%Y-%m-%d')"
+          git push
