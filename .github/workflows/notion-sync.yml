@@ -23,7 +23,8 @@ jobs:
           TOKEN = os.environ['NOTION_TOKEN']
           if isinstance(TOKEN, bytes):
             TOKEN = TOKEN.decode('utf-8')
-            HEADERS = {
+            
+          HEADERS = {
             'Authorization': f'Bearer {TOKEN}',
             'Notion-Version': '2022-06-01',
             'Content-Type': 'application/json',
